@@ -46,7 +46,7 @@
           <select id="layerFilter">
             <option value="">Todos</option>
           </select>
-          <p id="status" class="status">Sin datos cargados (usando demo).</p>
+          <p id="status" class="status">Preparando import automatico...</p>
         </div>
 
         <div class="block">
@@ -111,6 +111,12 @@
 
       <main class="map-wrap">
         <div id="map"></div>
+        <div id="loadingOverlay" class="loading-overlay" aria-live="polite">
+          <div class="loading-card">
+            <div class="spinner" aria-hidden="true"></div>
+            <p id="loadingText">Cargando cafeterias...</p>
+          </div>
+        </div>
       </main>
     </div>
 

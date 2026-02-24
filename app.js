@@ -1,14 +1,11 @@
-const defaultPoints = [
-  { name: "Bruncheria", lat: -31.4119, lng: -64.1917 },
-  { name: "Le Dureau", lat: -31.4233, lng: -64.1892 },
-  { name: "Krake Cafe", lat: -31.4283, lng: -64.1822 },
-  { name: "Lado B", lat: -31.4325, lng: -64.1754 },
-  { name: "Comadreja", lat: -31.4175, lng: -64.1749 }
-];
+const defaultMyMapsUrl =
+  "https://www.google.com/maps/d/u/0/viewer?mid=1fMXnq7tJ3ToCsxz8NBltdYgiO5ldsyg&ll=-31.420478598270606%2C-64.18262452047118&z=13";
 
 const inputs = {
   myMapsUrl: document.getElementById("myMapsUrl"),
   importMyMapsBtn: document.getElementById("importMyMapsBtn"),
+  loadingOverlay: document.getElementById("loadingOverlay"),
+  loadingText: document.getElementById("loadingText"),
   fileInput: document.getElementById("fileInput"),
   pasteInput: document.getElementById("pasteInput"),
   loadPasteBtn: document.getElementById("loadPasteBtn"),
@@ -56,12 +53,29 @@ L.control.zoom({ position: "bottomright" }).addTo(map);
 
 let currentTile = null;
 let markerLayer = L.layerGroup().addTo(map);
-let allPoints = [...defaultPoints];
-let points = [...defaultPoints];
+let allPoints = [];
+let points = [];
 const myMapsUrlStorageKey = "bike-coffee-my-maps-url";
+let loadingCount = 0;
 
 function setStatus(message) {
   inputs.status.textContent = message;
+}
+
+function setLoading(isLoading, message = "Cargando cafeterias...") {
+  if (isLoading) {
+    loadingCount += 1;
+    if (message) {
+      inputs.loadingText.textContent = message;
+    }
+    inputs.loadingOverlay.classList.remove("is-hidden");
+    return;
+  }
+
+  loadingCount = Math.max(loadingCount - 1, 0);
+  if (loadingCount === 0) {
+    inputs.loadingOverlay.classList.add("is-hidden");
+  }
 }
 
 function setBaseLayer(name) {
@@ -402,6 +416,27 @@ async function loadPointsFromMyMaps(rawInput) {
   );
 }
 
+async function importMyMapsFromInput() {
+  setLoading(true, "Descargando KML de Google My Maps...");
+  setStatus("Descargando KML desde Google My Maps...");
+
+  try {
+    const inputUrl = inputs.myMapsUrl.value.trim();
+    const { loadedPoints, sourceUrl, mode } = await loadPointsFromMyMaps(inputUrl);
+    localStorage.setItem(myMapsUrlStorageKey, inputUrl);
+    updatePoints(loadedPoints, `My Maps (${mode})`);
+    setStatus(`Cargados ${allPoints.length} markers desde My Maps. Fuente: ${sourceUrl}`);
+  } catch (error) {
+    markerLayer.clearLayers();
+    allPoints = [];
+    points = [];
+    syncLayerFilterOptions(allPoints);
+    setStatus(`Error importando My Maps: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+}
+
 function updatePoints(newPoints, sourceLabel) {
   if (!newPoints.length) {
     setStatus(`No se encontraron puntos validos en ${sourceLabel}.`);
@@ -448,15 +483,7 @@ function bindEvents() {
   });
 
   inputs.importMyMapsBtn.addEventListener("click", async () => {
-    try {
-      setStatus("Descargando KML desde Google My Maps...");
-      const { loadedPoints, sourceUrl, mode } = await loadPointsFromMyMaps(inputs.myMapsUrl.value);
-      localStorage.setItem(myMapsUrlStorageKey, inputs.myMapsUrl.value.trim());
-      updatePoints(loadedPoints, `My Maps (${mode})`);
-      setStatus(`Cargados ${allPoints.length} markers desde My Maps. Fuente: ${sourceUrl}`);
-    } catch (error) {
-      setStatus(`Error importando My Maps: ${error.message}`);
-    }
+    await importMyMapsFromInput();
   });
 
   inputs.basemapSelect.addEventListener("change", () => {
@@ -493,20 +520,26 @@ function bindEvents() {
     }
 
     try {
+      setLoading(true, "Procesando archivo...");
       const content = await file.text();
       const loaded = parseInputText(content, file.name);
       updatePoints(loaded, file.name);
     } catch (error) {
       setStatus(`Error cargando archivo: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   });
 
   inputs.loadPasteBtn.addEventListener("click", () => {
     try {
+      setLoading(true, "Procesando JSON pegado...");
       const loaded = parseInputText(inputs.pasteInput.value, "pegado");
       updatePoints(loaded, "texto pegado");
     } catch (error) {
       setStatus(`Error parseando input pegado: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   });
 
@@ -522,18 +555,16 @@ function bindEvents() {
   });
 }
 
-function init() {
+async function init() {
   const rememberedMyMapsUrl = localStorage.getItem(myMapsUrlStorageKey);
-  if (rememberedMyMapsUrl) {
-    inputs.myMapsUrl.value = rememberedMyMapsUrl;
-  }
+  inputs.myMapsUrl.value = rememberedMyMapsUrl || defaultMyMapsUrl;
 
   setBaseLayer(inputs.basemapSelect.value);
   bindEvents();
   syncLayerFilterOptions(allPoints);
   renderMarkers();
-  fitToData();
-  setStatus("Demo cargado. Importa tu archivo para reemplazar markers.");
+  setStatus("Cargando cafeterias por defecto...");
+  await importMyMapsFromInput();
 }
 
-init();
+void init();
