@@ -9,6 +9,13 @@
 - No se reescriben commits existentes salvo pedido explicito.
 - Se prioriza mantener una web estatica simple, portable y compatible con GitHub Pages.
 
+## Acuerdos activos de este proyecto
+
+- Objetivo: mapa de cafeterias para salidas de bici con estetica limpia para flyer.
+- Prioridad tecnica: simplicidad operativa (sin build) + import flexible de markers.
+- Flujo base: importar datos -> ajustar estilo en UI -> modo captura -> screenshot.
+- Commits: un commit por bloque de cambio (feature/documentacion/ajuste) para trazabilidad.
+
 ## Convenciones para este repo
 
 - Evitar dependencias de build cuando no sean necesarias.
