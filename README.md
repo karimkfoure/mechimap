@@ -8,8 +8,9 @@ Web estatica para preparar un mapa limpio de cafeterias y generar estilos visual
 - No muestra markers hasta terminar la descarga del KML (con overlay de loading).
 - Permite filtrar por layer del KML.
 - Usa MapLibre GL (vector) para controlar visibilidad y estilo por componentes reales del mapa.
+- Incluye catalogo de basemaps OpenFreeMap + CARTO listos para alternar desde la UI.
 - Incluye controles amplios para estilo: capas base, colores por componente, labels base, cafeterias, atmosfera, poster y canvas.
-- Incluye presets visuales y paneles colapsables para ajustes finos.
+- Incluye presets visuales renovados (editorial, mono, night, park, warm, voyager, noir) y paneles colapsables para ajustes finos.
 - Incluye modo captura para ocultar el panel lateral y exportar screenshot manualmente.
 
 ## Uso local
@@ -70,6 +71,13 @@ Notas de la suite:
 4. Ajustar estilo visual por bloques colapsables (capas, colores, labels, atmosfera, etc).
 5. Definir ratio de salida y margen externo para encuadre.
 6. Activar `Modo captura` y sacar screenshot.
+
+## Basemaps incluidos
+
+- OpenFreeMap: `Bright`, `Positron`, `Liberty`, `Dark`.
+- CARTO: `Voyager`, `Positron`, `Dark Matter`.
+
+Todos se consumen como estilos vectoriales compatibles con MapLibre GL, por lo que mantienen el pipeline de control por capas/colores y captura.
 
 ## Controles destacados
 
