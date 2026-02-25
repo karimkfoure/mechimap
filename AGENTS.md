@@ -24,3 +24,27 @@
 - Mantener configuraciones y UI legibles para uso practico en generacion de flyers.
 - Documentar en `README.md` como cargar datos y ajustar estilos del mapa.
 - Guardar ejemplos de entrada en `data/` cuando aporte valor para pruebas visuales.
+
+## Validacion pre-push con Playwright MCP
+
+- Para cambios de UI, estilos, flujo de import o captura, correr smoke test manual asistido por Playwright MCP antes de `git push`.
+- Levantar la web estatica en local (por ejemplo `python3 -m http.server 4173`) y probar sobre `http://127.0.0.1:4173`.
+- Cobertura minima obligatoria del flujo base:
+  1. Carga inicial del mapa sin errores visibles.
+  2. Import de markers (idealmente con ejemplo en `data/`).
+  3. Ajuste de estilos desde UI.
+  4. Activacion de modo captura y verificacion de resultado visual.
+- Evidencia minima por corrida:
+  - `browser_snapshot` de estado inicial y estado final.
+  - Screenshot (viewport o full page) del resultado esperado para flyer.
+  - `browser_console_messages` en nivel `error` y `warning`.
+  - `browser_network_requests` (sin estaticos) para detectar fallos de carga.
+- Criterios de pase antes de pushear:
+  - Sin errores en consola relacionados a la app.
+  - Sin requests criticos fallidos.
+  - Flujo base completo ejecutado de punta a punta.
+- En cambios visuales relevantes, validar en dos vistas: desktop (ej. `1366x900`) y mobile (ej. `390x844`).
+- Handoff de QA con usuario:
+  - Tras mis pruebas, no cerrar el browser de Playwright MCP; dejar la pagina lista para prueba manual del usuario.
+  - Si el usuario detecta un problema, recolectar logs de la misma sesion abierta (`browser_console_messages` y `browser_network_requests`) antes de reiniciar nada.
+  - Solo cerrar la sesion de browser cuando el usuario confirme que ya termino su ronda manual.
