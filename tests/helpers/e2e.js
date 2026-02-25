@@ -87,7 +87,7 @@ async function mockDefaultKml(page) {
 }
 
 async function gotoAndWaitForReady(page) {
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#map .maplibregl-canvas")).toBeVisible({ timeout: 30_000 });
   await expect(page.locator("#status")).toContainText("Cargados", { timeout: 30_000 });
   await expect(page.locator("#loadingOverlay")).toHaveClass(/is-hidden/, { timeout: 30_000 });
