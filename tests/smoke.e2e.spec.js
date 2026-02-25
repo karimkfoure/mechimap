@@ -94,18 +94,20 @@ test("@quick switch representativo de basemaps mantiene capas visibles", async (
       );
       expect(afterRoadStreetColor).toEqual(beforeRoadStreetColor);
 
-      const beforeRoadLabelOpacity = await page.evaluate(() =>
-        window.__COFFEEMAP_MAP__.getPaintProperty("road-label", "text-opacity")
+      const beforeRoadLabelColor = await page.evaluate(() =>
+        window.__COFFEEMAP_MAP__.getPaintProperty("road-label", "text-color")
       );
       await page.locator("#baseLabelOpacity").evaluate((element) => {
         element.value = "35";
         element.dispatchEvent(new Event("input", { bubbles: true }));
       });
-      const afterRoadLabelOpacity = await page.evaluate(() =>
-        window.__COFFEEMAP_MAP__.getPaintProperty("road-label", "text-opacity")
-      );
-      expect(afterRoadLabelOpacity).toEqual(0.35);
-      expect(afterRoadLabelOpacity).not.toEqual(beforeRoadLabelOpacity);
+      const afterRoadLabelState = await page.evaluate(() => ({
+        opacity: window.__COFFEEMAP_MAP__.getPaintProperty("road-label", "text-opacity"),
+        color: window.__COFFEEMAP_MAP__.getPaintProperty("road-label", "text-color")
+      }));
+      expect(afterRoadLabelState.opacity).toEqual(1);
+      expect(String(afterRoadLabelState.color)).toContain("0.35");
+      expect(String(afterRoadLabelState.color)).not.toEqual(String(beforeRoadLabelColor));
     }
   }
 

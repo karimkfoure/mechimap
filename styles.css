@@ -201,6 +201,10 @@ details[open] > summary::after {
   width: auto;
 }
 
+.checkbox-row.is-disabled {
+  opacity: 0.45;
+}
+
 .style-entity-empty {
   margin: 0;
   font-size: 0.78rem;

@@ -10,6 +10,7 @@ import {
   applyComponentColors,
   applyLayerVisibility,
   applyMapCanvasFilter,
+  syncLayerControlAvailability,
   renderStyleEntityEditor,
   captureBaseFeaturePaint,
   captureBaseLabelSizes,
@@ -89,6 +90,7 @@ function onStyleReady(styleLoadToken = activeStyleLoadToken) {
     inputs.basemapSelect.value = state.currentBasemap;
   }
   classifyMapLayers();
+  syncLayerControlAvailability();
   captureBaseLabelSizes();
   captureBaseFeaturePaint();
   ensureCafeLayers();

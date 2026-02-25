@@ -3,14 +3,14 @@ import { state } from "../core/state.js";
 import { applyCafeStyles, fitToData, updateCafeSource } from "./cafe-layers.js";
 import { loadDefaultMapData, applyLayerFilter } from "./data-source.js";
 import {
-  applyCreativeFeatureAmplification,
   applySingleBaseLabelStyle,
   applySingleComponentStyle,
   applyLayerVisibility,
   applyMapCanvasFilter
 } from "./map-style.js";
 import {
-  applyCreativeControls,
+  applyCreativeFeatureControls,
+  applyCreativeToneControls,
   applyCreativeDistortion,
   applyCreativeProfile,
   applyAtmosphereStyles,
@@ -93,12 +93,10 @@ export function bindEvents({ switchBasemap, applyPreset }) {
     el.addEventListener("input", () => {
       state.componentStyleOverridesEnabled = true;
       applySingleComponentStyle(key);
-      applyCreativeFeatureAmplification();
     });
     el.addEventListener("change", () => {
       state.componentStyleOverridesEnabled = true;
       applySingleComponentStyle(key);
-      applyCreativeFeatureAmplification();
     });
   });
 
@@ -109,20 +107,14 @@ export function bindEvents({ switchBasemap, applyPreset }) {
 
   inputs.resetGlobalFiltersBtn.addEventListener("click", resetGlobalFilters);
 
-  [
-    inputs.labelDensityPreset,
-    inputs.accentTarget,
-    inputs.accentStrength,
-    inputs.inkBoost,
-    inputs.riverBoost,
-    inputs.featureFocus,
-    inputs.featureFocusStrength,
-    inputs.paletteBgColor,
-    inputs.paletteInkColor,
-    inputs.paletteAccentColor
-  ].forEach((el) => {
-    el?.addEventListener("input", applyCreativeControls);
-    el?.addEventListener("change", applyCreativeControls);
+  [inputs.labelDensityPreset, inputs.accentTarget, inputs.accentStrength, inputs.paletteBgColor, inputs.paletteInkColor, inputs.paletteAccentColor].forEach((el) => {
+    el?.addEventListener("input", applyCreativeToneControls);
+    el?.addEventListener("change", applyCreativeToneControls);
+  });
+
+  [inputs.inkBoost, inputs.riverBoost, inputs.featureFocus, inputs.featureFocusStrength].forEach((el) => {
+    el?.addEventListener("input", applyCreativeFeatureControls);
+    el?.addEventListener("change", applyCreativeFeatureControls);
   });
 
   [

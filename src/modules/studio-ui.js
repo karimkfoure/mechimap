@@ -208,7 +208,7 @@ function mixHexColor(colorA, colorB, ratio = 0.5) {
   );
 }
 
-function applyLabelDensityPreset() {
+export function applyLabelDensityPreset() {
   const preset = inputs.labelDensityPreset?.value || "balanced";
 
   if (preset === "silent") {
@@ -235,7 +235,7 @@ function applyLabelDensityPreset() {
   }
 }
 
-function applyCreativePalette() {
+export function applyCreativePalette() {
   const bg = inputs.paletteBgColor?.value || inputs.bgColor.value;
   const ink = inputs.paletteInkColor?.value || inputs.roadMajorColor.value;
   const accent = inputs.paletteAccentColor?.value || inputs.waterColor.value;
@@ -279,9 +279,8 @@ export function applyCreativeDistortion() {
   document.documentElement.style.setProperty("--map-art-scale-y", String(scaleY));
 }
 
-export function applyCreativeControls() {
+export function applyCreativeToneControls() {
   if (!state.styleReady) {
-    applyCreativeDistortion();
     return;
   }
 
@@ -294,6 +293,22 @@ export function applyCreativeControls() {
   applyComponentColors();
   applyBaseLabelStyles();
   applyCreativeFeatureAmplification();
+}
+
+export function applyCreativeFeatureControls() {
+  if (!state.styleReady) {
+    return;
+  }
+  applyCreativeFeatureAmplification();
+}
+
+export function applyCreativeControls() {
+  if (!state.styleReady) {
+    applyCreativeDistortion();
+    return;
+  }
+
+  applyCreativeToneControls();
   applyCreativeDistortion();
 }
 

@@ -1,6 +1,6 @@
 import { inputs } from "../core/inputs.js";
 import { state } from "../core/state.js";
-import { cloneValue, scaleTextSizeValue } from "../core/helpers.js";
+import { cloneValue, hexToRgba, scaleTextSizeValue } from "../core/helpers.js";
 
 const roadLineKeywords = [
   "road",
@@ -68,6 +68,42 @@ function getBaseLabelIds() {
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
+
+function buildTextFieldTransform(baseTextField, transform) {
+  if (!baseTextField || transform === "none") {
+    return cloneValue(baseTextField);
+  }
+
+  if (baseTextField && typeof baseTextField === "object" && !Array.isArray(baseTextField)) {
+    return cloneValue(baseTextField);
+  }
+
+  if (Array.isArray(baseTextField) && baseTextField[0] === "format") {
+    return cloneValue(baseTextField);
+  }
+
+  if (transform === "uppercase") {
+    return ["upcase", cloneValue(baseTextField)];
+  }
+  if (transform === "lowercase") {
+    return ["downcase", cloneValue(baseTextField)];
+  }
+  return cloneValue(baseTextField);
+}
+
+const layerToggleBindings = [
+  ["showWater", "water"],
+  ["showParks", "parks"],
+  ["showLanduse", "landuse"],
+  ["showRoadsMajor", "roadsMajor"],
+  ["showRoadsMinor", "roadsMinor"],
+  ["showBuildings", "buildings"],
+  ["showBoundaries", "boundaries"],
+  ["showRoadLabels", "labelsRoad"],
+  ["showPlaceLabels", "labelsPlace"],
+  ["showPoiLabels", "labelsPoi"],
+  ["showWaterLabels", "labelsWater"]
+];
 
 export function classifyMapLayers() {
   const groups = {
@@ -165,12 +201,18 @@ export function classifyMapLayers() {
 
 export function captureBaseLabelSizes() {
   state.baseLabelSizes.clear();
+  state.baseLabelTextFields.clear();
   const ids = getBaseLabelIds();
 
   for (const id of ids) {
     const textSize = state.map.getLayoutProperty(id, "text-size");
     if (textSize != null) {
       state.baseLabelSizes.set(id, cloneValue(textSize));
+    }
+
+    const textField = state.map.getLayoutProperty(id, "text-field");
+    if (textField != null) {
+      state.baseLabelTextFields.set(id, cloneValue(textField));
     }
   }
 }
@@ -179,6 +221,11 @@ function saveBasePaint(layerId, property) {
   const value = readPaintProperty(layerId, property);
   if (typeof value === "number" && Number.isFinite(value)) {
     state.baseFeaturePaint.set(`${layerId}:${property}`, value);
+    return;
+  }
+
+  if (Array.isArray(value) || (value && typeof value === "object")) {
+    state.baseFeaturePaint.set(`${layerId}:${property}`, cloneValue(value));
   }
 }
 
@@ -227,6 +274,26 @@ export function safeSetLayout(id, property, value) {
     state.map.setLayoutProperty(id, property, value);
   } catch {
     // ignore layers without that layout property
+  }
+}
+
+export function syncLayerControlAvailability() {
+  if (!state.styleReady) {
+    return;
+  }
+
+  for (const [inputKey, groupKey] of layerToggleBindings) {
+    const toggle = inputs[inputKey];
+    if (!toggle) {
+      continue;
+    }
+    const hasLayers = (state.layerGroups[groupKey] || []).length > 0;
+    toggle.disabled = !hasLayers;
+    const container = toggle.closest(".checkbox-row");
+    if (container) {
+      container.classList.toggle("is-disabled", !hasLayers);
+      container.title = hasLayers ? "" : "No disponible para el style activo";
+    }
   }
 }
 
@@ -443,16 +510,17 @@ export function applyBaseLabelStyles() {
 
   const ids = getBaseLabelIds();
 
-  const labelOpacity = Number(inputs.baseLabelOpacity.value) / 100;
+  const labelOpacity = clamp(Number(inputs.baseLabelOpacity.value) / 100, 0, 1);
+  const textColor = hexToRgba(inputs.baseLabelColor.value, labelOpacity);
   const haloWidth = Number(inputs.baseLabelHaloWidth.value);
   const scale = Number(inputs.baseLabelSizeScale.value) / 100;
+  const transform = inputs.baseLabelTransform.value;
 
   for (const id of ids) {
-    safeSetPaint(id, "text-color", inputs.baseLabelColor.value);
-    safeSetPaint(id, "text-opacity", labelOpacity);
+    safeSetPaint(id, "text-color", textColor);
+    safeSetPaint(id, "text-opacity", 1);
     safeSetPaint(id, "text-halo-color", inputs.baseLabelHaloColor.value);
     safeSetPaint(id, "text-halo-width", haloWidth);
-    safeSetLayout(id, "text-transform", inputs.baseLabelTransform.value);
 
     if (state.baseLabelSizes.has(id)) {
       const base = cloneValue(state.baseLabelSizes.get(id));
@@ -460,6 +528,12 @@ export function applyBaseLabelStyles() {
       if (scaled != null) {
         safeSetLayout(id, "text-size", scaled);
       }
+    }
+
+    if (state.baseLabelTextFields.has(id)) {
+      const baseTextField = cloneValue(state.baseLabelTextFields.get(id));
+      const transformed = buildTextFieldTransform(baseTextField, transform);
+      safeSetLayout(id, "text-field", transformed);
     }
   }
 }
@@ -469,16 +543,21 @@ function applyBaseLabelControl(controlKey) {
   const scale = Number(inputs.baseLabelSizeScale.value) / 100;
 
   for (const id of ids) {
-    if (controlKey === "baseLabelColor") {
-      safeSetPaint(id, "text-color", inputs.baseLabelColor.value);
-    } else if (controlKey === "baseLabelOpacity") {
-      safeSetPaint(id, "text-opacity", Number(inputs.baseLabelOpacity.value) / 100);
+    if (controlKey === "baseLabelColor" || controlKey === "baseLabelOpacity") {
+      const opacity = clamp(Number(inputs.baseLabelOpacity.value) / 100, 0, 1);
+      safeSetPaint(id, "text-color", hexToRgba(inputs.baseLabelColor.value, opacity));
+      safeSetPaint(id, "text-opacity", 1);
     } else if (controlKey === "baseLabelHaloColor") {
       safeSetPaint(id, "text-halo-color", inputs.baseLabelHaloColor.value);
     } else if (controlKey === "baseLabelHaloWidth") {
       safeSetPaint(id, "text-halo-width", Number(inputs.baseLabelHaloWidth.value));
     } else if (controlKey === "baseLabelTransform") {
-      safeSetLayout(id, "text-transform", inputs.baseLabelTransform.value);
+      if (!state.baseLabelTextFields.has(id)) {
+        continue;
+      }
+      const baseTextField = cloneValue(state.baseLabelTextFields.get(id));
+      const transformed = buildTextFieldTransform(baseTextField, inputs.baseLabelTransform.value);
+      safeSetLayout(id, "text-field", transformed);
     } else if (controlKey === "baseLabelSizeScale" && state.baseLabelSizes.has(id)) {
       const base = cloneValue(state.baseLabelSizes.get(id));
       const scaled = scaleTextSizeValue(base, scale);
@@ -496,6 +575,68 @@ export function applySingleBaseLabelStyle(controlKey) {
   applyBaseLabelControl(controlKey);
 }
 
+function applyExpressionBounds(expression, minValue = null, maxValue = null) {
+  let next = expression;
+  if (minValue != null) {
+    next = ["max", minValue, next];
+  }
+  if (maxValue != null) {
+    next = ["min", maxValue, next];
+  }
+  return next;
+}
+
+function scaleOutputValue(value, scale, minValue = null, maxValue = null) {
+  if (typeof value === "number") {
+    return clamp(value * scale, minValue ?? Number.NEGATIVE_INFINITY, maxValue ?? Number.POSITIVE_INFINITY);
+  }
+  return applyExpressionBounds(["*", cloneValue(value), scale], minValue, maxValue);
+}
+
+function scalePaintValue(baseValue, scale, minValue = null, maxValue = null) {
+  if (typeof baseValue === "number") {
+    return clamp(baseValue * scale, minValue ?? Number.NEGATIVE_INFINITY, maxValue ?? Number.POSITIVE_INFINITY);
+  }
+
+  if (Array.isArray(baseValue)) {
+    const op = baseValue[0];
+
+    if (op === "step") {
+      const scaled = cloneValue(baseValue);
+      if (scaled.length > 2) {
+        scaled[2] = scaleOutputValue(scaled[2], scale, minValue, maxValue);
+      }
+      for (let i = 4; i < scaled.length; i += 2) {
+        scaled[i] = scaleOutputValue(scaled[i], scale, minValue, maxValue);
+      }
+      return scaled;
+    }
+
+    if (op === "interpolate") {
+      const scaled = cloneValue(baseValue);
+      for (let i = 4; i < scaled.length; i += 2) {
+        scaled[i] = scaleOutputValue(scaled[i], scale, minValue, maxValue);
+      }
+      return scaled;
+    }
+
+    return applyExpressionBounds(["*", cloneValue(baseValue), scale], minValue, maxValue);
+  }
+
+  if (baseValue && typeof baseValue === "object" && Array.isArray(baseValue.stops)) {
+    const scaled = cloneValue(baseValue);
+    scaled.stops = scaled.stops.map((pair) => {
+      if (!Array.isArray(pair) || pair.length < 2) {
+        return pair;
+      }
+      return [pair[0], scaleOutputValue(pair[1], scale, minValue, maxValue)];
+    });
+    return scaled;
+  }
+
+  return null;
+}
+
 function applyGroupLineWidth(groupKey, widthScale = 1) {
   const ids = state.layerGroups[groupKey] || [];
   for (const id of ids) {
@@ -504,8 +645,9 @@ function applyGroupLineWidth(groupKey, widthScale = 1) {
       continue;
     }
     const base = state.baseFeaturePaint.get(`${id}:line-width`);
-    if (typeof base === "number") {
-      safeSetPaint(id, "line-width", clamp(base * widthScale, 0, 26));
+    const scaled = scalePaintValue(base, widthScale, 0, 26);
+    if (scaled != null) {
+      safeSetPaint(id, "line-width", scaled);
     }
   }
 }
@@ -520,15 +662,17 @@ function applyGroupOpacity(groupKey, opacityScale = 1) {
 
     if (layer.type === "line") {
       const base = state.baseFeaturePaint.get(`${id}:line-opacity`);
-      if (typeof base === "number") {
-        safeSetPaint(id, "line-opacity", clamp(base * opacityScale, 0, 1));
+      const scaled = scalePaintValue(base, opacityScale, 0, 1);
+      if (scaled != null) {
+        safeSetPaint(id, "line-opacity", scaled);
       }
     }
 
     if (layer.type === "fill") {
       const base = state.baseFeaturePaint.get(`${id}:fill-opacity`);
-      if (typeof base === "number") {
-        safeSetPaint(id, "fill-opacity", clamp(base * opacityScale, 0, 1));
+      const scaled = scalePaintValue(base, opacityScale, 0, 1);
+      if (scaled != null) {
+        safeSetPaint(id, "fill-opacity", scaled);
       }
     }
   }
@@ -901,6 +1045,7 @@ export function renderStyleEntityEditor() {
       const colorInput = document.createElement("input");
       colorInput.type = "color";
       colorInput.value = getEntityColor(entity);
+      colorInput.defaultValue = colorInput.value;
       colorInput.dataset.entityKey = entity.key;
       colorInput.dataset.entityAction = "color";
       colorLabel.append(colorInput);
@@ -915,6 +1060,7 @@ export function renderStyleEntityEditor() {
       opacityInput.min = "0";
       opacityInput.max = "100";
       opacityInput.value = String(getEntityOpacity(entity));
+      opacityInput.defaultValue = opacityInput.value;
       opacityInput.dataset.entityKey = entity.key;
       opacityInput.dataset.entityAction = "opacity";
       opacityLabel.append(opacityInput);
@@ -930,6 +1076,7 @@ export function renderStyleEntityEditor() {
       widthInput.max = "24";
       widthInput.step = "0.2";
       widthInput.value = String(getEntityWidth(entity));
+      widthInput.defaultValue = widthInput.value;
       widthInput.dataset.entityKey = entity.key;
       widthInput.dataset.entityAction = "width";
       widthLabel.append(widthInput);

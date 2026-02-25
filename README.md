@@ -63,8 +63,9 @@ Comportamiento de precedencia:
 ## Controles destacados
 
 - `Capas del mapa`: agua, parques, landuse, calles principales/secundarias, edificios, limites, labels.
-- `Motor`: selector agrupado por proveedor y etiquetas `[disruptivo]` para estilos tipo poster.
-- `Edicion creativa`: perfil rapido, jerarquia de labels, acento visual, escala de trazos/rio, foco de features y transformacion geometrica.
+- `Capas del mapa`: si un grupo no existe en el style activo, su toggle queda deshabilitado para evitar no-ops/confusion.
+- `Motor`: selector agrupado por proveedor (OpenFreeMap, CARTO, Stadia).
+- `Edicion creativa`: perfil rapido, jerarquia de labels, acento visual, escala de trazos/rio, foco de features y transformacion geometrica. Los escalados aplican tambien cuando el style usa expresiones (`step`/`interpolate`).
 - `Entidades del style activo`: editor dinamico por capas reales del basemap actual (`source-layer`) con visibilidad, color, opacidad y trazo cuando el style lo soporta.
 - `Colores por componente`: fondo, agua, verde, rutas, edificios, limites (con opacidades).
 - `Refinado global`: brillo, contraste, saturacion, grises y tono.
@@ -138,7 +139,7 @@ Notas:
 - `full` recorre todo el catalogo de basemaps y presets, incluyendo `import -> preset -> basemap -> captura`.
 - La suite prioriza contratos de estabilidad de UI luego de acciones asincronas (preset/basemap/import).
 - El output de consola se mantiene corto cuando pasa; el analisis largo se hace solo cuando falla.
-- Los sliders (`input[type="range"]`) soportan doble click para volver al valor default.
+- Los sliders (`input[type="range"]`) soportan doble click para volver al valor default, incluyendo sliders creados dinamicamente en `Entidades del style activo`.
 
 ## QA manual asistido (Playwright MCP)
 
