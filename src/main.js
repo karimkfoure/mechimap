@@ -22,6 +22,32 @@ import {
   applyPreset
 } from "./modules/studio-ui.js";
 
+let styleSwitchTimeoutId = null;
+
+function clearStyleSwitchTimeout() {
+  if (styleSwitchTimeoutId) {
+    clearTimeout(styleSwitchTimeoutId);
+    styleSwitchTimeoutId = null;
+  }
+}
+
+function finishStyleSwitch() {
+  if (!state.styleSwitching) {
+    return;
+  }
+
+  state.styleSwitching = false;
+  clearStyleSwitchTimeout();
+  setLoading(false);
+}
+
+function scheduleStyleSwitchFailsafe() {
+  clearStyleSwitchTimeout();
+  styleSwitchTimeoutId = setTimeout(() => {
+    finishStyleSwitch();
+  }, 15000);
+}
+
 function onStyleReady() {
   state.styleReady = true;
   classifyMapLayers();
@@ -29,11 +55,7 @@ function onStyleReady() {
   ensureCafeLayers();
   updateCafeSource(false);
   applyAllStyleControls();
-
-  if (state.styleSwitching) {
-    state.styleSwitching = false;
-    setLoading(false);
-  }
+  finishStyleSwitch();
 }
 
 function switchBasemap(styleKey) {
@@ -46,8 +68,11 @@ function switchBasemap(styleKey) {
 
   state.currentBasemap = styleKey;
   state.styleReady = false;
-  state.styleSwitching = true;
-  setLoading(true, "Cambiando estilo base...");
+  if (!state.styleSwitching) {
+    state.styleSwitching = true;
+    setLoading(true, "Cambiando estilo base...");
+  }
+  scheduleStyleSwitchFailsafe();
   state.map.setStyle(styleUrls[styleKey]);
 }
 
