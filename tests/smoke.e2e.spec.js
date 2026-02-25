@@ -1,4 +1,5 @@
 const {
+  waitForUiSettled,
   assertNoRuntimeErrors,
   mockDefaultKml,
   expect,
@@ -12,8 +13,8 @@ test.beforeEach(async ({ page }) => {
 test("@quick smoke flujo base", async ({ page, diagnostics }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("h1")).toHaveText("Bike & Coffee");
-  await expect(page.locator("#map .maplibregl-canvas")).toBeVisible({ timeout: 30_000 });
   await expect(page.locator("#status")).toContainText(/Cargando|Cargados/);
+  await waitForUiSettled(page, { timeout: 30_000 });
 
   await page.locator("#mapBrightness").evaluate((element) => {
     element.value = "115";
@@ -27,7 +28,7 @@ test("@quick smoke flujo base", async ({ page, diagnostics }) => {
   await page.click("#togglePanelBtn");
   await expect(page.locator("#appShell")).toHaveClass(/panel-hidden/);
 
-  await page.waitForTimeout(400);
+  await waitForUiSettled(page);
 
   assertNoRuntimeErrors(diagnostics);
 });

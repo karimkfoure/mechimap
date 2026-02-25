@@ -1,7 +1,11 @@
 const {
+  applyPreset,
+  runUiAction,
+  switchBasemap,
   assertNoRuntimeErrors,
   gotoAndWaitForReady,
   mockDefaultKml,
+  waitForUiSettled,
   expect,
   test
 } = require("./helpers/e2e");
@@ -15,18 +19,21 @@ test("flujo completo: carga, estilo, poster y encuadre", async ({ page, diagnost
 
   await test.step("carga inicial y filtro por layer", async () => {
     await expect(page.locator("#layerFilter option")).toHaveCount(3);
-    await page.selectOption("#layerFilter", "Centro");
+    await runUiAction(page, async () => {
+      await page.selectOption("#layerFilter", "Centro");
+    });
     await expect(page.locator("#status")).toContainText("Layer activo: Centro.");
     await expect(page.locator("#status")).toContainText("Cafes visibles: 3.");
 
-    await page.selectOption("#layerFilter", "");
+    await runUiAction(page, async () => {
+      await page.selectOption("#layerFilter", "");
+    });
     await expect(page.locator("#status")).toContainText("Mostrando todas las capas.");
     await expect(page.locator("#status")).toContainText("Cafes visibles: 6.");
   });
 
   await test.step("preset night y ajustes de refinado", async () => {
-    await page.selectOption("#presetSelect", "night");
-    await page.click("#applyPresetBtn");
+    await applyPreset(page, "night");
     await expect(page.locator("#status")).toContainText("Preset aplicado: night.");
     await expect(page.locator("#basemapSelect")).toHaveValue("dark");
 
@@ -48,21 +55,24 @@ test("flujo completo: carga, estilo, poster y encuadre", async ({ page, diagnost
     await page.fill("#centerLat", "-31.430000");
     await page.fill("#centerLng", "-64.190000");
     await page.fill("#zoomInput", "12.5");
-    await page.click("#applyViewBtn");
+    await runUiAction(page, async () => {
+      await page.click("#applyViewBtn");
+    });
 
-    await page.waitForTimeout(250);
     expect(Number(await page.inputValue("#centerLat"))).toBeCloseTo(-31.43, 2);
     expect(Number(await page.inputValue("#centerLng"))).toBeCloseTo(-64.19, 2);
     expect(Number(await page.inputValue("#zoomInput"))).toBeCloseTo(12.5, 1);
 
-    await page.click("#resetCameraBtn");
-    await page.waitForTimeout(250);
+    await runUiAction(page, async () => {
+      await page.click("#resetCameraBtn");
+    });
     expect(Number(await page.inputValue("#centerLat"))).toBeCloseTo(-31.42048, 3);
     expect(Number(await page.inputValue("#centerLng"))).toBeCloseTo(-64.18262, 3);
     expect(Number(await page.inputValue("#zoomInput"))).toBeCloseTo(13, 1);
 
-    await page.selectOption("#canvasRatio", "1:1");
-    await page.waitForTimeout(100);
+    await runUiAction(page, async () => {
+      await page.selectOption("#canvasRatio", "1:1");
+    });
 
     const ratio = await page.locator("#mapFrame").evaluate((element) => {
       const bounds = element.getBoundingClientRect();
@@ -70,6 +80,14 @@ test("flujo completo: carga, estilo, poster y encuadre", async ({ page, diagnost
     });
     expect(ratio).toBeGreaterThan(0.98);
     expect(ratio).toBeLessThan(1.02);
+  });
+
+  await test.step("contrato generico: cambios consecutivos no dejan UI bloqueada", async () => {
+    await applyPreset(page, "park");
+    await applyPreset(page, "mono");
+    await switchBasemap(page, "bright");
+    await switchBasemap(page, "liberty");
+    await waitForUiSettled(page, { timeout: 4_000 });
   });
 
   await test.step("modo captura y poster", async () => {
@@ -94,7 +112,9 @@ test("flujo completo: carga, estilo, poster y encuadre", async ({ page, diagnost
     await expect(page.locator("#posterTitleNode")).toHaveText("Ruta de cafe");
     await expect(page.locator("#posterSubtitleNode")).toHaveText("Sabado 8:30");
 
-    await page.click("#togglePanelBtn");
+    await runUiAction(page, async () => {
+      await page.click("#togglePanelBtn");
+    });
     await expect(page.locator("#appShell")).toHaveClass(/panel-hidden/);
   });
 

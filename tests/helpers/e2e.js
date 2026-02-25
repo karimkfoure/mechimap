@@ -88,9 +88,40 @@ async function mockDefaultKml(page) {
 
 async function gotoAndWaitForReady(page) {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("#map .maplibregl-canvas")).toBeVisible({ timeout: 30_000 });
   await expect(page.locator("#status")).toContainText("Cargados", { timeout: 30_000 });
-  await expect(page.locator("#loadingOverlay")).toHaveClass(/is-hidden/, { timeout: 30_000 });
+  await waitForUiSettled(page, { timeout: 30_000 });
+}
+
+async function waitForUiSettled(page, options = {}) {
+  const timeout = options.timeout ?? 12_000;
+  await expect(page.locator("#map .maplibregl-canvas")).toBeVisible({ timeout });
+  await expect(page.locator("#loadingOverlay")).toHaveClass(/is-hidden/, { timeout });
+}
+
+async function runUiAction(page, action, options = {}) {
+  await action();
+  await waitForUiSettled(page, options);
+}
+
+async function applyPreset(page, presetName, options = {}) {
+  await runUiAction(
+    page,
+    async () => {
+      await page.selectOption("#presetSelect", presetName);
+      await page.click("#applyPresetBtn");
+    },
+    options
+  );
+}
+
+async function switchBasemap(page, basemap, options = {}) {
+  await runUiAction(
+    page,
+    async () => {
+      await page.selectOption("#basemapSelect", basemap);
+    },
+    options
+  );
 }
 
 function assertNoRuntimeErrors(diagnostics) {
@@ -109,9 +140,13 @@ function assertNoRuntimeErrors(diagnostics) {
 }
 
 module.exports = {
+  applyPreset,
   assertNoRuntimeErrors,
   gotoAndWaitForReady,
   mockDefaultKml,
+  runUiAction,
+  switchBasemap,
+  waitForUiSettled,
   expect,
   test
 };
