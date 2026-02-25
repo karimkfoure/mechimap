@@ -3,18 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bike & Coffee Map</title>
+    <title>Bike & Coffee Map Studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;700&family=Oswald:wght@400;500;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap"
       rel="stylesheet"
     />
     <link
+      href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
       rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-      crossorigin=""
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -22,210 +20,344 @@
     <div class="app-shell" id="appShell">
       <aside class="panel" id="controlPanel">
         <h1>Bike & Coffee</h1>
-        <p class="subtitle">Estudio visual de mapa para flyer</p>
+        <p class="subtitle">Map Studio para flyers</p>
 
-        <div class="block">
+        <section class="block">
           <h2>Fuente</h2>
           <p class="status" id="status">Cargando cafeterias por defecto...</p>
           <p class="muted">
             Fuente fija:
             <a id="sourceLink" target="_blank" rel="noopener noreferrer">Google My Maps</a>
           </p>
-          <button id="reloadDataBtn" type="button">Recargar puntos</button>
+          <button id="reloadDataBtn" type="button">Recargar datos</button>
           <label for="layerFilter">Layer</label>
           <select id="layerFilter">
             <option value="">Todos</option>
           </select>
-        </div>
+        </section>
 
-        <div class="block">
-          <h2>Base</h2>
-          <label for="basemapSelect">Basemap</label>
+        <section class="block">
+          <h2>Presets</h2>
+          <label for="presetSelect">Estilo rapido</label>
+          <select id="presetSelect">
+            <option value="editorial">Editorial</option>
+            <option value="mono">Mono Ink</option>
+            <option value="night">Night Ride</option>
+            <option value="park">Park Pop</option>
+            <option value="warm">Warm Print</option>
+          </select>
+          <button id="applyPresetBtn" type="button">Aplicar preset</button>
+        </section>
+
+        <section class="block">
+          <h2>Motor</h2>
+          <label for="basemapSelect">Basemap vector</label>
           <select id="basemapSelect">
-            <option value="light">Claro minimal</option>
-            <option value="lightNoLabels">Claro sin etiquetas</option>
-            <option value="voyager">Voyager</option>
-            <option value="tonerLite">Toner Lite</option>
-            <option value="dark">Oscuro limpio</option>
+            <option value="bright">OpenFreeMap Bright</option>
+            <option value="positron">OpenFreeMap Positron</option>
+            <option value="liberty">OpenFreeMap Liberty</option>
+            <option value="dark">OpenFreeMap Dark</option>
           </select>
-          <label for="tileOpacity">Opacidad base</label>
-          <input id="tileOpacity" type="range" min="0" max="100" value="100" />
-          <label for="tileBrightness">Brillo</label>
-          <input id="tileBrightness" type="range" min="40" max="180" value="100" />
-          <label for="tileContrast">Contraste</label>
-          <input id="tileContrast" type="range" min="40" max="200" value="100" />
-          <label for="tileSaturation">Saturacion</label>
-          <input id="tileSaturation" type="range" min="0" max="220" value="100" />
-          <label for="tileGrayscale">Grises</label>
-          <input id="tileGrayscale" type="range" min="0" max="100" value="0" />
-          <label for="tileSepia">Sepia</label>
-          <input id="tileSepia" type="range" min="0" max="100" value="0" />
-          <label for="tileHue">Tono</label>
-          <input id="tileHue" type="range" min="0" max="360" value="0" />
-          <button id="resetBaseBtn" type="button">Reset base</button>
-        </div>
+        </section>
 
-        <div class="block">
-          <h2>Markers</h2>
-          <label for="markerColor">Color</label>
-          <input id="markerColor" type="color" value="#d24828" />
-          <label for="markerStroke">Borde</label>
-          <input id="markerStroke" type="color" value="#fff4e8" />
-          <label for="markerRadius">Tamano</label>
-          <input id="markerRadius" type="range" min="3" max="28" value="10" />
-          <label for="markerOpacity">Opacidad</label>
-          <input id="markerOpacity" type="range" min="0" max="100" value="92" />
-          <label for="strokeWeight">Grosor borde</label>
-          <input id="strokeWeight" type="range" min="0" max="8" value="2" />
-          <label for="haloColor">Halo</label>
-          <input id="haloColor" type="color" value="#d24828" />
-          <label for="haloSize">Tamano halo</label>
-          <input id="haloSize" type="range" min="0" max="30" value="8" />
-          <label for="haloOpacity">Opacidad halo</label>
-          <input id="haloOpacity" type="range" min="0" max="100" value="24" />
-          <label for="jitterMeters">Dispersion (metros)</label>
-          <input id="jitterMeters" type="range" min="0" max="120" value="0" />
-          <label class="checkbox-row">
-            <input id="showMarkerShadow" type="checkbox" checked />
-            Sombra de marcador
-          </label>
-        </div>
-
-        <div class="block">
-          <h2>Etiquetas</h2>
-          <label class="checkbox-row">
-            <input id="showLabels" type="checkbox" checked />
-            Mostrar etiquetas
-          </label>
-          <label for="labelMode">Modo texto</label>
-          <select id="labelMode">
-            <option value="name">Nombre</option>
-            <option value="indexName">Indice + nombre</option>
-            <option value="index">Solo indice</option>
-          </select>
-          <label for="labelFont">Fuente</label>
-          <select id="labelFont">
-            <option value="Space Grotesk">Space Grotesk</option>
-            <option value="DM Sans">DM Sans</option>
-            <option value="Oswald">Oswald</option>
-            <option value="Instrument Serif">Instrument Serif</option>
-          </select>
-          <label for="labelColor">Color texto</label>
-          <input id="labelColor" type="color" value="#1f232e" />
-          <label for="labelSize">Tamano texto</label>
-          <input id="labelSize" type="range" min="9" max="34" value="13" />
-          <label for="labelWeight">Peso</label>
-          <input id="labelWeight" type="range" min="300" max="900" step="100" value="700" />
-          <label for="labelLetterSpacing">Tracking</label>
-          <input id="labelLetterSpacing" type="range" min="0" max="4" step="0.1" value="0.1" />
-          <label for="labelOffsetY">Offset Y</label>
-          <input id="labelOffsetY" type="range" min="-48" max="24" value="-14" />
-          <label for="labelTransform">Transform</label>
-          <select id="labelTransform">
-            <option value="none">Normal</option>
-            <option value="uppercase">Uppercase</option>
-            <option value="capitalize">Capitalize</option>
-          </select>
-          <label for="labelBgColor">Color fondo etiqueta</label>
-          <input id="labelBgColor" type="color" value="#fffaf2" />
-          <label for="labelBgOpacity">Opacidad fondo etiqueta</label>
-          <input id="labelBgOpacity" type="range" min="0" max="100" value="0" />
-          <label for="labelPadding">Padding etiqueta</label>
-          <input id="labelPadding" type="range" min="0" max="12" value="2" />
-          <label for="labelRadius">Radio fondo etiqueta</label>
-          <input id="labelRadius" type="range" min="0" max="24" value="6" />
-        </div>
-
-        <div class="block">
-          <h2>Atmosfera</h2>
-          <label for="tintColor">Color tint</label>
-          <input id="tintColor" type="color" value="#f2cf9d" />
-          <label for="tintOpacity">Opacidad tint</label>
-          <input id="tintOpacity" type="range" min="0" max="100" value="0" />
-          <label for="vignetteOpacity">Vignette</label>
-          <input id="vignetteOpacity" type="range" min="0" max="100" value="14" />
-          <label for="grainOpacity">Grano</label>
-          <input id="grainOpacity" type="range" min="0" max="50" value="0" />
-          <label for="frameColor">Color marco</label>
-          <input id="frameColor" type="color" value="#f6f0e2" />
-          <label for="frameWidth">Grosor marco</label>
-          <input id="frameWidth" type="range" min="0" max="40" value="0" />
-          <label for="frameRadius">Radio marco</label>
-          <input id="frameRadius" type="range" min="0" max="40" value="0" />
-          <label for="frameShadow">Sombra marco</label>
-          <input id="frameShadow" type="range" min="0" max="80" value="14" />
-        </div>
-
-        <div class="block">
-          <h2>Poster</h2>
-          <label class="checkbox-row">
-            <input id="showPoster" type="checkbox" />
-            Mostrar titulo en mapa
-          </label>
-          <label for="posterTitle">Titulo</label>
-          <input id="posterTitle" type="text" value="Bike & Coffee Club" />
-          <label for="posterSubtitle">Subtitulo</label>
-          <input id="posterSubtitle" type="text" value="Cordoba, Argentina" />
-          <label for="posterPosition">Posicion</label>
-          <select id="posterPosition">
-            <option value="top-left">Arriba izquierda</option>
-            <option value="top-right">Arriba derecha</option>
-            <option value="bottom-left">Abajo izquierda</option>
-            <option value="bottom-right">Abajo derecha</option>
-            <option value="center">Centro</option>
-          </select>
-          <label for="posterColor">Color texto poster</label>
-          <input id="posterColor" type="color" value="#1a1f2a" />
-          <label for="posterSize">Tamano titulo</label>
-          <input id="posterSize" type="range" min="14" max="70" value="34" />
-          <label for="posterSubtitleSize">Tamano subtitulo</label>
-          <input id="posterSubtitleSize" type="range" min="10" max="38" value="16" />
-          <label for="posterBgColor">Color fondo poster</label>
-          <input id="posterBgColor" type="color" value="#fff9ed" />
-          <label for="posterBgOpacity">Opacidad fondo poster</label>
-          <input id="posterBgOpacity" type="range" min="0" max="100" value="0" />
-          <label for="posterPadding">Padding poster</label>
-          <input id="posterPadding" type="range" min="4" max="40" value="14" />
-        </div>
-
-        <div class="block">
-          <h2>Vista</h2>
-          <label for="canvasRatio">Ratio de salida</label>
-          <select id="canvasRatio">
-            <option value="fill">Libre</option>
-            <option value="1:1">1:1</option>
-            <option value="4:5">4:5</option>
-            <option value="3:4">3:4</option>
-            <option value="16:9">16:9</option>
-            <option value="9:16">9:16</option>
-          </select>
-          <label for="canvasPadding">Margen externo</label>
-          <input id="canvasPadding" type="range" min="0" max="80" value="0" />
-          <label for="fitPadding">Padding ajuste automatico</label>
-          <input id="fitPadding" type="range" min="0" max="180" value="36" />
-          <div class="grid-3">
-            <div>
-              <label for="centerLat">Lat</label>
-              <input id="centerLat" type="number" step="0.000001" value="-31.42048" />
+        <section class="block">
+          <details open>
+            <summary>Capas del mapa</summary>
+            <div class="details-content">
+              <label class="checkbox-row"><input id="showWater" type="checkbox" checked /> Agua</label>
+              <label class="checkbox-row"><input id="showParks" type="checkbox" checked /> Parques y verde</label>
+              <label class="checkbox-row"><input id="showLanduse" type="checkbox" checked /> Landuse urbano</label>
+              <label class="checkbox-row"><input id="showRoadsMajor" type="checkbox" checked /> Calles principales</label>
+              <label class="checkbox-row"><input id="showRoadsMinor" type="checkbox" checked /> Calles secundarias</label>
+              <label class="checkbox-row"><input id="showBuildings" type="checkbox" checked /> Edificios</label>
+              <label class="checkbox-row"><input id="showBoundaries" type="checkbox" checked /> Limites</label>
+              <label class="checkbox-row"><input id="showRoadLabels" type="checkbox" checked /> Labels de calles</label>
+              <label class="checkbox-row"><input id="showPlaceLabels" type="checkbox" checked /> Labels de ciudad/barrios</label>
+              <label class="checkbox-row"><input id="showPoiLabels" type="checkbox" checked /> Labels de POI</label>
+              <label class="checkbox-row"><input id="showWaterLabels" type="checkbox" checked /> Labels de agua</label>
             </div>
-            <div>
-              <label for="centerLng">Lng</label>
-              <input id="centerLng" type="number" step="0.000001" value="-64.18262" />
+          </details>
+
+          <details>
+            <summary>Colores por componente</summary>
+            <div class="details-content">
+              <details open>
+                <summary>Terreno y agua</summary>
+                <div class="details-content nested">
+                  <label for="bgColor">Fondo</label>
+                  <input id="bgColor" type="color" value="#f8f4f0" />
+                  <label for="waterColor">Agua</label>
+                  <input id="waterColor" type="color" value="#aecfe2" />
+                  <label for="waterOpacity">Opacidad agua</label>
+                  <input id="waterOpacity" type="range" min="0" max="100" value="100" />
+                  <label for="parkColor">Parques</label>
+                  <input id="parkColor" type="color" value="#d8e8c8" />
+                  <label for="parkOpacity">Opacidad parques</label>
+                  <input id="parkOpacity" type="range" min="0" max="100" value="80" />
+                  <label for="landuseColor">Landuse</label>
+                  <input id="landuseColor" type="color" value="#e9e4da" />
+                  <label for="landuseOpacity">Opacidad landuse</label>
+                  <input id="landuseOpacity" type="range" min="0" max="100" value="50" />
+                </div>
+              </details>
+
+              <details>
+                <summary>Viales y estructura</summary>
+                <div class="details-content nested">
+                  <label for="roadMajorColor">Calles principales</label>
+                  <input id="roadMajorColor" type="color" value="#f0b77e" />
+                  <label for="roadMajorOpacity">Opacidad calles principales</label>
+                  <input id="roadMajorOpacity" type="range" min="0" max="100" value="100" />
+                  <label for="roadMinorColor">Calles secundarias</label>
+                  <input id="roadMinorColor" type="color" value="#ffffff" />
+                  <label for="roadMinorOpacity">Opacidad calles secundarias</label>
+                  <input id="roadMinorOpacity" type="range" min="0" max="100" value="95" />
+                  <label for="buildingColor">Edificios</label>
+                  <input id="buildingColor" type="color" value="#e6ddd2" />
+                  <label for="buildingOpacity">Opacidad edificios</label>
+                  <input id="buildingOpacity" type="range" min="0" max="100" value="75" />
+                  <label for="boundaryColor">Limites</label>
+                  <input id="boundaryColor" type="color" value="#8f8a94" />
+                  <label for="boundaryOpacity">Opacidad limites</label>
+                  <input id="boundaryOpacity" type="range" min="0" max="100" value="70" />
+                </div>
+              </details>
             </div>
-            <div>
-              <label for="zoomInput">Zoom</label>
-              <input id="zoomInput" type="number" min="1" max="20" step="1" value="13" />
+          </details>
+
+          <details>
+            <summary>Refinado global (contraste y tono)</summary>
+            <div class="details-content">
+              <label for="mapBrightness">Brillo</label>
+              <input id="mapBrightness" type="range" min="40" max="180" value="100" />
+              <label for="mapContrast">Contraste</label>
+              <input id="mapContrast" type="range" min="40" max="200" value="100" />
+              <label for="mapSaturation">Saturacion</label>
+              <input id="mapSaturation" type="range" min="0" max="220" value="100" />
+              <label for="mapGrayscale">Grises</label>
+              <input id="mapGrayscale" type="range" min="0" max="100" value="0" />
+              <label for="mapHue">Tono</label>
+              <input id="mapHue" type="range" min="0" max="360" value="0" />
+              <button id="resetGlobalFiltersBtn" type="button">Reset refinado</button>
             </div>
-          </div>
-          <button id="applyViewBtn" type="button">Aplicar vista</button>
-          <button id="fitBtn" type="button">Ajustar al contenido</button>
-          <button id="togglePanelBtn" type="button">Modo captura</button>
-        </div>
+          </details>
+        </section>
+
+        <section class="block">
+          <details open>
+            <summary>Etiquetas del mapa base</summary>
+            <div class="details-content">
+              <label for="baseLabelColor">Color labels base</label>
+              <input id="baseLabelColor" type="color" value="#3a3a3a" />
+              <label for="baseLabelOpacity">Opacidad labels base</label>
+              <input id="baseLabelOpacity" type="range" min="0" max="100" value="100" />
+              <label for="baseLabelHaloColor">Halo labels base</label>
+              <input id="baseLabelHaloColor" type="color" value="#ffffff" />
+              <label for="baseLabelHaloWidth">Halo width</label>
+              <input id="baseLabelHaloWidth" type="range" min="0" max="4" step="0.1" value="1" />
+              <label for="baseLabelSizeScale">Escala tamano labels</label>
+              <input id="baseLabelSizeScale" type="range" min="50" max="180" value="100" />
+              <label for="baseLabelTransform">Transform</label>
+              <select id="baseLabelTransform">
+                <option value="none">Normal</option>
+                <option value="uppercase">Uppercase</option>
+                <option value="lowercase">Lowercase</option>
+              </select>
+            </div>
+          </details>
+
+          <details>
+            <summary>Cafeterias: marcadores</summary>
+            <div class="details-content">
+              <label for="markerColor">Color marcador</label>
+              <input id="markerColor" type="color" value="#d24828" />
+              <label for="markerStroke">Borde marcador</label>
+              <input id="markerStroke" type="color" value="#fff4e8" />
+              <label for="markerRadius">Tamano</label>
+              <input id="markerRadius" type="range" min="2" max="32" value="10" />
+              <label for="markerOpacity">Opacidad marcador</label>
+              <input id="markerOpacity" type="range" min="0" max="100" value="92" />
+              <label for="strokeWeight">Grosor borde</label>
+              <input id="strokeWeight" type="range" min="0" max="10" value="2" />
+
+              <label for="haloColor">Color halo</label>
+              <input id="haloColor" type="color" value="#d24828" />
+              <label for="haloSize">Tamano halo</label>
+              <input id="haloSize" type="range" min="0" max="36" value="8" />
+              <label for="haloOpacity">Opacidad halo</label>
+              <input id="haloOpacity" type="range" min="0" max="100" value="28" />
+
+              <label for="shadowColor">Color sombra</label>
+              <input id="shadowColor" type="color" value="#000000" />
+              <label for="shadowOpacity">Opacidad sombra</label>
+              <input id="shadowOpacity" type="range" min="0" max="100" value="18" />
+              <label for="shadowBlur">Blur sombra</label>
+              <input id="shadowBlur" type="range" min="0" max="1" step="0.01" value="0.5" />
+              <div class="grid-2">
+                <div>
+                  <label for="shadowOffsetX">Offset X</label>
+                  <input id="shadowOffsetX" type="range" min="-12" max="12" value="0" />
+                </div>
+                <div>
+                  <label for="shadowOffsetY">Offset Y</label>
+                  <input id="shadowOffsetY" type="range" min="-12" max="12" value="3" />
+                </div>
+              </div>
+
+              <label for="jitterMeters">Dispersion (m)</label>
+              <input id="jitterMeters" type="range" min="0" max="140" value="0" />
+            </div>
+          </details>
+
+          <details>
+            <summary>Cafeterias: etiquetas</summary>
+            <div class="details-content">
+              <label class="checkbox-row"><input id="showLabels" type="checkbox" checked /> Mostrar etiquetas</label>
+              <label for="labelMode">Modo de texto</label>
+              <select id="labelMode">
+                <option value="name">Nombre</option>
+                <option value="indexName">Indice + nombre</option>
+                <option value="index">Solo indice</option>
+              </select>
+              <label for="labelTransform">Transform</label>
+              <select id="labelTransform">
+                <option value="none">Normal</option>
+                <option value="uppercase">Uppercase</option>
+                <option value="capitalize">Capitalize</option>
+              </select>
+              <label for="labelColor">Color texto</label>
+              <input id="labelColor" type="color" value="#1f232e" />
+              <label for="labelSize">Tamano texto</label>
+              <input id="labelSize" type="range" min="9" max="36" value="13" />
+              <label for="labelHaloColor">Halo texto</label>
+              <input id="labelHaloColor" type="color" value="#ffffff" />
+              <label for="labelHaloWidth">Halo width</label>
+              <input id="labelHaloWidth" type="range" min="0" max="4" step="0.1" value="1.2" />
+              <label for="labelLetterSpacing">Tracking</label>
+              <input id="labelLetterSpacing" type="range" min="0" max="0.3" step="0.01" value="0.04" />
+              <label for="labelOffsetY">Offset Y</label>
+              <input id="labelOffsetY" type="range" min="-60" max="30" value="-16" />
+            </div>
+          </details>
+        </section>
+
+        <section class="block">
+          <details>
+            <summary>Atmosfera y poster</summary>
+            <div class="details-content">
+              <details open>
+                <summary>Atmosfera</summary>
+                <div class="details-content nested">
+                  <label for="tintColor">Tint</label>
+                  <input id="tintColor" type="color" value="#f2cf9d" />
+                  <label for="tintOpacity">Opacidad tint</label>
+                  <input id="tintOpacity" type="range" min="0" max="100" value="0" />
+                  <label for="vignetteOpacity">Vignette</label>
+                  <input id="vignetteOpacity" type="range" min="0" max="100" value="12" />
+                  <label for="grainOpacity">Grano</label>
+                  <input id="grainOpacity" type="range" min="0" max="45" value="0" />
+                  <label for="frameColor">Color marco</label>
+                  <input id="frameColor" type="color" value="#f6f0e2" />
+                  <label for="frameWidth">Grosor marco</label>
+                  <input id="frameWidth" type="range" min="0" max="40" value="0" />
+                  <label for="frameRadius">Radio marco</label>
+                  <input id="frameRadius" type="range" min="0" max="40" value="0" />
+                  <label for="frameShadow">Sombra marco</label>
+                  <input id="frameShadow" type="range" min="0" max="80" value="14" />
+                </div>
+              </details>
+
+              <details>
+                <summary>Poster</summary>
+                <div class="details-content nested">
+                  <label class="checkbox-row"><input id="showPoster" type="checkbox" /> Mostrar poster</label>
+                  <label for="posterTitle">Titulo</label>
+                  <input id="posterTitle" type="text" value="Bike & Coffee Club" />
+                  <label for="posterSubtitle">Subtitulo</label>
+                  <input id="posterSubtitle" type="text" value="Cordoba, Argentina" />
+                  <label for="posterPosition">Posicion</label>
+                  <select id="posterPosition">
+                    <option value="top-left">Arriba izquierda</option>
+                    <option value="top-right">Arriba derecha</option>
+                    <option value="bottom-left">Abajo izquierda</option>
+                    <option value="bottom-right">Abajo derecha</option>
+                    <option value="center">Centro</option>
+                  </select>
+                  <label for="posterColor">Color texto</label>
+                  <input id="posterColor" type="color" value="#1a1f2a" />
+                  <label for="posterSize">Tamano titulo</label>
+                  <input id="posterSize" type="range" min="14" max="72" value="34" />
+                  <label for="posterSubtitleSize">Tamano subtitulo</label>
+                  <input id="posterSubtitleSize" type="range" min="10" max="40" value="16" />
+                  <label for="posterBgColor">Color fondo</label>
+                  <input id="posterBgColor" type="color" value="#fff9ed" />
+                  <label for="posterBgOpacity">Opacidad fondo</label>
+                  <input id="posterBgOpacity" type="range" min="0" max="100" value="0" />
+                  <label for="posterPadding">Padding</label>
+                  <input id="posterPadding" type="range" min="4" max="40" value="14" />
+                </div>
+              </details>
+            </div>
+          </details>
+        </section>
+
+        <section class="block">
+          <details open>
+            <summary>Vista y encuadre</summary>
+            <div class="details-content">
+              <label for="canvasRatio">Ratio</label>
+              <select id="canvasRatio">
+                <option value="fill">Libre</option>
+                <option value="1:1">1:1</option>
+                <option value="4:5">4:5</option>
+                <option value="3:4">3:4</option>
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16</option>
+              </select>
+              <label for="canvasPadding">Margen externo</label>
+              <input id="canvasPadding" type="range" min="0" max="80" value="0" />
+              <label for="fitPadding">Padding ajuste contenido</label>
+              <input id="fitPadding" type="range" min="0" max="200" value="36" />
+
+              <div class="grid-2">
+                <div>
+                  <label for="pitchInput">Pitch</label>
+                  <input id="pitchInput" type="range" min="0" max="60" value="0" />
+                </div>
+                <div>
+                  <label for="bearingInput">Bearing</label>
+                  <input id="bearingInput" type="range" min="-180" max="180" value="0" />
+                </div>
+              </div>
+
+              <div class="grid-3">
+                <div>
+                  <label for="centerLat">Lat</label>
+                  <input id="centerLat" type="number" step="0.000001" value="-31.42048" />
+                </div>
+                <div>
+                  <label for="centerLng">Lng</label>
+                  <input id="centerLng" type="number" step="0.000001" value="-64.18262" />
+                </div>
+                <div>
+                  <label for="zoomInput">Zoom</label>
+                  <input id="zoomInput" type="number" min="1" max="20" step="0.1" value="13" />
+                </div>
+              </div>
+
+              <button id="applyViewBtn" type="button">Aplicar vista</button>
+              <button id="fitBtn" type="button">Ajustar al contenido</button>
+              <button id="resetCameraBtn" type="button">Reset camara</button>
+              <button id="togglePanelBtn" type="button">Modo captura</button>
+            </div>
+          </details>
+        </section>
       </aside>
 
       <main class="map-wrap" id="mapWrap">
         <div id="mapFrame" class="map-frame">
           <div id="map"></div>
+
           <div id="mapTint" class="map-overlay tint-overlay"></div>
           <div id="mapVignette" class="map-overlay vignette-overlay"></div>
           <div id="mapGrain" class="map-overlay grain-overlay"></div>
@@ -245,11 +377,7 @@
       </main>
     </div>
 
-    <script
-      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-      crossorigin=""
-    ></script>
+    <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
