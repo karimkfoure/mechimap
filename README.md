@@ -1,13 +1,13 @@
 # Bike & Coffee Flyer Map
 
-Web estatica para preparar un mapa limpio de cafeterias, ajustar su estilo visual y sacar capturas para flyers.
+Web estatica para preparar un mapa limpio de cafeterias y generar estilos visuales listos para compartir/capturar en flyers.
 
 ## Que resuelve
 
-- Muestra una ciudad con un basemap simplificado.
-- Destaca cafeterias con markers configurables.
-- Permite cargar datos desde export de Google My Maps (`.kml`) o desde `.geojson/.json`.
-- Permite importar directo pegando la URL de Google My Maps (viewer o KML), sin descarga manual.
+- Carga automaticamente una fuente fija de Google My Maps al abrir la app.
+- No muestra markers hasta terminar la descarga del KML (con overlay de loading).
+- Permite filtrar por layer del KML.
+- Incluye controles amplios para estilo: base, filtros, markers, etiquetas, atmosfera, poster y canvas.
 - Incluye modo captura para ocultar el panel lateral y exportar screenshot manualmente.
 
 ## Uso local
@@ -20,29 +20,18 @@ python3 -m http.server 8080
 
 Luego ir a `http://localhost:8080`.
 
-## Formatos de entrada soportados
+## Fuente de datos
 
-1. `KML` (export de Google My Maps) con `Placemark -> Point`.
-2. `GeoJSON` (`FeatureCollection` de `Point`).
-3. URL de Google My Maps (`viewer?mid=...`) o URL KML.
-4. `JSON` con arreglo de objetos tipo:
-
-```json
-[
-  { "name": "Cafe 1", "lat": -31.42, "lng": -64.18 },
-  { "name": "Cafe 2", "latitude": -31.43, "longitude": -64.19 }
-]
-```
+- URL fija de My Maps (configurada en `app.js`): se toma el `mid`, se descarga KML y se parsean `Placemark -> Point`.
+- Si hay carpetas/layers en el KML, se habilita selector de layer para visualizar subconjuntos.
 
 ## Flujo recomendado para flyer
 
-1. Pegar URL de Google My Maps y usar `Importar desde My Maps`.
-2. Si el KML trae varias capas, seleccionar `Layer` desde la UI.
-3. Ajustar base, colores, tamano de marcador y etiquetas.
-4. Usar `Modo captura` para ocultar controles.
-5. Sacar screenshot del mapa final.
-
-Si el import directo falla por permisos/CORS, usar carga manual con archivo `KML` o `GeoJSON`.
+1. Esperar que carguen los puntos por defecto.
+2. Elegir layer (opcional).
+3. Ajustar estilo visual usando los bloques de UI.
+4. Definir ratio de salida y margen externo para encuadre.
+5. Activar `Modo captura` y sacar screenshot.
 
 ## Deploy en GitHub Pages (sin build)
 
@@ -56,7 +45,6 @@ GitHub Pages va a servir directamente `index.html`.
 
 ## Estructura
 
-- `index.html`: layout y controles.
-- `styles.css`: look & feel y modo captura.
-- `app.js`: mapa Leaflet, parsers y logica de UI.
-- `data/cafes-ejemplo.geojson`: dataset de ejemplo.
+- `index.html`: layout y controles del editor visual.
+- `styles.css`: look & feel, overlays, poster y canvas.
+- `app.js`: carga fija desde My Maps + logica completa de estilos.
