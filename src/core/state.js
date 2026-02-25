@@ -23,7 +23,9 @@ export const state = {
   },
   baseLabelSizes: new Map(),
   mapReady: false,
-  styleReady: false
+  styleReady: false,
+  componentStyleOverridesEnabled: false,
+  baseLabelStyleOverridesEnabled: false
 };
 
 export const cafeSourceId = "cafes-source";

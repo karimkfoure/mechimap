@@ -150,7 +150,7 @@ export function ensureCafeLayers() {
         "text-letter-spacing": 0.04,
         "text-offset": [0, -1.2],
         "text-anchor": "top",
-        "text-font": ["Noto Sans Bold"]
+        "text-font": ["Noto Sans Regular"]
       },
       paint: {
         "text-color": "#1f232e",

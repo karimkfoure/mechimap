@@ -164,7 +164,7 @@ export function applyLayerVisibility() {
 }
 
 export function applyComponentColors() {
-  if (!state.styleReady) {
+  if (!state.styleReady || !state.componentStyleOverridesEnabled) {
     return;
   }
 
@@ -235,7 +235,7 @@ export function applyMapCanvasFilter() {
 }
 
 export function applyBaseLabelStyles() {
-  if (!state.styleReady) {
+  if (!state.styleReady || !state.baseLabelStyleOverridesEnabled) {
     return;
   }
 

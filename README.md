@@ -37,6 +37,11 @@ La app resuelve este flujo de punta a punta:
 
 Todos se consumen como estilos vectoriales compatibles con MapLibre GL.
 
+Comportamiento de precedencia:
+
+- Al aplicar un preset, los valores del preset tienen prioridad sobre ajustes finos previos en controles conflictivos.
+- Al cambiar basemap manualmente desde el selector, se limpian overrides conflictivos (colores/componentes, labels base, filtros globales y atmosfera) para evitar residuos visuales del estilo anterior.
+
 ## Controles destacados
 
 - `Capas del mapa`: agua, parques, landuse, calles principales/secundarias, edificios, limites, labels.

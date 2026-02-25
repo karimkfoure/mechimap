@@ -2,7 +2,7 @@ import { defaultCamera, styleUrls } from "../core/constants.js";
 import { inputs } from "../core/inputs.js";
 import { state } from "../core/state.js";
 
-export function initMap({ onStyleReady, onInitialLoad, onMoveEnd }) {
+export function initMap({ onStyleLoad, onInitialLoad, onMoveEnd }) {
   const maplibre = window.maplibregl;
 
   if (!maplibre) {
@@ -22,10 +22,8 @@ export function initMap({ onStyleReady, onInitialLoad, onMoveEnd }) {
 
   state.map.addControl(new maplibre.NavigationControl({ showCompass: false }), "bottom-right");
 
-  state.map.on("styledata", () => {
-    if (!state.styleReady && state.map.isStyleLoaded()) {
-      onStyleReady();
-    }
+  state.map.on("style.load", () => {
+    onStyleLoad?.();
   });
 
   state.map.on("load", async () => {

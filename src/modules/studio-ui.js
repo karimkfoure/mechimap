@@ -11,6 +11,77 @@ import {
   applyMapCanvasFilter
 } from "./map-style.js";
 
+const globalFilterInputKeys = ["mapBrightness", "mapContrast", "mapSaturation", "mapGrayscale", "mapHue"];
+const componentStyleInputKeys = [
+  "bgColor",
+  "waterColor",
+  "waterOpacity",
+  "parkColor",
+  "parkOpacity",
+  "landuseColor",
+  "landuseOpacity",
+  "roadMajorColor",
+  "roadMajorOpacity",
+  "roadMinorColor",
+  "roadMinorOpacity",
+  "buildingColor",
+  "buildingOpacity",
+  "boundaryColor",
+  "boundaryOpacity"
+];
+const baseLabelInputKeys = [
+  "baseLabelColor",
+  "baseLabelOpacity",
+  "baseLabelHaloColor",
+  "baseLabelHaloWidth",
+  "baseLabelSizeScale",
+  "baseLabelTransform"
+];
+const atmosphereInputKeys = [
+  "tintColor",
+  "tintOpacity",
+  "vignetteOpacity",
+  "grainOpacity",
+  "frameColor",
+  "frameWidth",
+  "frameRadius",
+  "frameShadow"
+];
+const presetManagedInputKeys = [
+  ...new Set(
+    Object.values(presets)
+      .flatMap((preset) => Object.keys(preset))
+      .filter((key) => Boolean(inputs[key]))
+  )
+];
+
+function resetInputToDefault(element) {
+  if (!element) {
+    return;
+  }
+
+  if (element.tagName === "SELECT") {
+    const defaultOption = [...element.options].find((option) => option.defaultSelected) || element.options[0];
+    if (defaultOption) {
+      element.value = defaultOption.value;
+    }
+    return;
+  }
+
+  if (element.type === "checkbox") {
+    element.checked = element.defaultChecked;
+    return;
+  }
+
+  element.value = element.defaultValue;
+}
+
+function resetInputsToDefaults(keys) {
+  for (const key of keys) {
+    resetInputToDefault(inputs[key]);
+  }
+}
+
 export function applyAtmosphereStyles() {
   document.documentElement.style.setProperty("--tint-color", inputs.tintColor.value);
   document.documentElement.style.setProperty("--tint-opacity", String(Number(inputs.tintOpacity.value) / 100));
@@ -121,14 +192,18 @@ export function applyPreset(presetName, switchBasemap) {
     return;
   }
 
+  resetInputsToDefaults(presetManagedInputKeys);
+  state.componentStyleOverridesEnabled = true;
+  state.baseLabelStyleOverridesEnabled = true;
+
   for (const [key, value] of Object.entries(preset)) {
     if (inputs[key]) {
       setInputValue(inputs[key], value);
     }
   }
 
-  if (preset.basemapSelect) {
-    switchBasemap(preset.basemapSelect);
+  if (preset.basemapSelect && preset.basemapSelect !== state.currentBasemap) {
+    switchBasemap(preset.basemapSelect, { preserveStyleOverrides: true });
   } else {
     applyAllStyleControls();
     updateCafeSource(false);
@@ -138,10 +213,18 @@ export function applyPreset(presetName, switchBasemap) {
 }
 
 export function resetGlobalFilters() {
-  inputs.mapBrightness.value = "100";
-  inputs.mapContrast.value = "100";
-  inputs.mapSaturation.value = "100";
-  inputs.mapGrayscale.value = "0";
-  inputs.mapHue.value = "0";
+  resetInputsToDefaults(globalFilterInputKeys);
   applyMapCanvasFilter();
+}
+
+export function resetStyleConflictsForBasemapSwitch() {
+  resetInputsToDefaults(componentStyleInputKeys);
+  resetInputsToDefaults(baseLabelInputKeys);
+  resetInputsToDefaults(globalFilterInputKeys);
+  resetInputsToDefaults(atmosphereInputKeys);
+  state.componentStyleOverridesEnabled = false;
+  state.baseLabelStyleOverridesEnabled = false;
+
+  applyMapCanvasFilter();
+  applyAtmosphereStyles();
 }

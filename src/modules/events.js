@@ -65,8 +65,14 @@ export function bindEvents({ switchBasemap, applyPreset }) {
     inputs.boundaryColor,
     inputs.boundaryOpacity
   ].forEach((el) => {
-    el.addEventListener("input", applyComponentColors);
-    el.addEventListener("change", applyComponentColors);
+    el.addEventListener("input", () => {
+      state.componentStyleOverridesEnabled = true;
+      applyComponentColors();
+    });
+    el.addEventListener("change", () => {
+      state.componentStyleOverridesEnabled = true;
+      applyComponentColors();
+    });
   });
 
   [inputs.mapBrightness, inputs.mapContrast, inputs.mapSaturation, inputs.mapGrayscale, inputs.mapHue].forEach((el) => {
@@ -84,8 +90,14 @@ export function bindEvents({ switchBasemap, applyPreset }) {
     inputs.baseLabelSizeScale,
     inputs.baseLabelTransform
   ].forEach((el) => {
-    el.addEventListener("input", applyBaseLabelStyles);
-    el.addEventListener("change", applyBaseLabelStyles);
+    el.addEventListener("input", () => {
+      state.baseLabelStyleOverridesEnabled = true;
+      applyBaseLabelStyles();
+    });
+    el.addEventListener("change", () => {
+      state.baseLabelStyleOverridesEnabled = true;
+      applyBaseLabelStyles();
+    });
   });
 
   [

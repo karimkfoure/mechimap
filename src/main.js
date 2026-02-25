@@ -19,12 +19,14 @@ import {
   applyAtmosphereStyles,
   applyCanvasLayout,
   applyPosterStyles,
-  applyPreset
+  applyPreset,
+  resetStyleConflictsForBasemapSwitch
 } from "./modules/studio-ui.js";
 
 let styleSwitchTimeoutId = null;
 let pendingBasemapKey = null;
-let styleReadyCheckId = null;
+let activeStyleLoadToken = 0;
+let activeBasemapKey = state.currentBasemap;
 
 function clearStyleSwitchTimeout() {
   if (styleSwitchTimeoutId) {
@@ -33,22 +35,19 @@ function clearStyleSwitchTimeout() {
   }
 }
 
-function clearStyleReadyCheck() {
-  if (styleReadyCheckId) {
-    clearInterval(styleReadyCheckId);
-    styleReadyCheckId = null;
-  }
-}
-
 function finishStyleSwitch() {
   if (!state.styleSwitching) {
     return;
   }
 
+  const hasQueuedBasemap = Boolean(pendingBasemapKey);
   state.styleSwitching = false;
   clearStyleSwitchTimeout();
-  clearStyleReadyCheck();
   setLoading(false);
+
+  if (hasQueuedBasemap) {
+    startQueuedBasemapSwitch();
+  }
 }
 
 function scheduleStyleSwitchFailsafe() {
@@ -56,19 +55,6 @@ function scheduleStyleSwitchFailsafe() {
   styleSwitchTimeoutId = setTimeout(() => {
     finishStyleSwitch();
   }, 15000);
-}
-
-function scheduleStyleReadyCheck() {
-  clearStyleReadyCheck();
-  styleReadyCheckId = setInterval(() => {
-    if (!state.map || state.styleReady) {
-      return;
-    }
-    if (!state.map.isStyleLoaded()) {
-      return;
-    }
-    onStyleReady();
-  }, 120);
 }
 
 function startQueuedBasemapSwitch() {
@@ -85,14 +71,21 @@ function startQueuedBasemapSwitch() {
     setLoading(true, "Cambiando estilo base...");
   }
 
+  ++activeStyleLoadToken;
+  activeBasemapKey = styleKey;
   scheduleStyleSwitchFailsafe();
-  state.map.setStyle(styleUrls[styleKey]);
-  scheduleStyleReadyCheck();
+  state.map.setStyle(styleUrls[styleKey], { diff: false });
 }
 
-function onStyleReady() {
-  clearStyleReadyCheck();
+function onStyleReady(styleLoadToken = activeStyleLoadToken) {
+  if (styleLoadToken !== activeStyleLoadToken || state.styleReady) {
+    return;
+  }
   state.styleReady = true;
+  state.currentBasemap = activeBasemapKey;
+  if (inputs.basemapSelect.value !== state.currentBasemap) {
+    inputs.basemapSelect.value = state.currentBasemap;
+  }
   classifyMapLayers();
   captureBaseLabelSizes();
   ensureCafeLayers();
@@ -107,15 +100,17 @@ function onStyleReady() {
   finishStyleSwitch();
 }
 
-function switchBasemap(styleKey) {
+function switchBasemap(styleKey, options = {}) {
   if (!styleUrls[styleKey]) {
     return;
   }
   if (styleKey === state.currentBasemap && !pendingBasemapKey && !state.styleSwitching) {
     return;
   }
+  if (!options.preserveStyleOverrides) {
+    resetStyleConflictsForBasemapSwitch();
+  }
 
-  state.currentBasemap = styleKey;
   pendingBasemapKey = styleKey;
 
   if (!state.styleSwitching) {
@@ -140,14 +135,12 @@ function init() {
   applyPosterStyles();
 
   initMap({
-    onStyleReady,
+    onStyleLoad: () => onStyleReady(activeStyleLoadToken),
     onInitialLoad: async () => {
       applyCanvasLayout();
       await loadDefaultMapData();
     }
   });
-
-  scheduleStyleReadyCheck();
 }
 
 init();

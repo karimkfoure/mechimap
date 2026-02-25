@@ -51,6 +51,33 @@ test("flujo completo: carga, estilo, poster y encuadre", async ({ page, diagnost
     expect(mapFilter).toContain("brightness(130%)");
   });
 
+  await test.step("switch manual de basemap limpia overrides conflictivos", async () => {
+    await switchBasemap(page, "bright");
+
+    await expect(page.locator("#mapBrightness")).toHaveValue("100");
+    await expect(page.locator("#mapContrast")).toHaveValue("100");
+    await expect(page.locator("#mapSaturation")).toHaveValue("100");
+    await expect(page.locator("#mapGrayscale")).toHaveValue("0");
+    await expect(page.locator("#mapHue")).toHaveValue("0");
+    await expect(page.locator("#tintOpacity")).toHaveValue("0");
+    await expect(page.locator("#vignetteOpacity")).toHaveValue("12");
+    await expect(page.locator("#grainOpacity")).toHaveValue("0");
+    await expect(page.locator("#frameWidth")).toHaveValue("0");
+
+    const visualVars = await page.evaluate(() => ({
+      mapFilter: getComputedStyle(document.documentElement).getPropertyValue("--map-filter"),
+      tintOpacity: getComputedStyle(document.documentElement).getPropertyValue("--tint-opacity"),
+      vignetteOpacity: getComputedStyle(document.documentElement).getPropertyValue("--vignette-opacity"),
+      frameWidth: getComputedStyle(document.documentElement).getPropertyValue("--frame-width")
+    }));
+
+    expect(visualVars.mapFilter).toContain("brightness(100%)");
+    expect(visualVars.mapFilter).toContain("contrast(100%)");
+    expect(visualVars.tintOpacity).toBe("0");
+    expect(visualVars.vignetteOpacity).toBe("0.12");
+    expect(visualVars.frameWidth).toBe("0px");
+  });
+
   await test.step("encuadre manual, reset de camara y ratio", async () => {
     await page.fill("#centerLat", "-31.430000");
     await page.fill("#centerLng", "-64.190000");
