@@ -23,11 +23,20 @@ import {
 } from "./modules/studio-ui.js";
 
 let styleSwitchTimeoutId = null;
+let pendingBasemapKey = null;
+let styleReadyCheckId = null;
 
 function clearStyleSwitchTimeout() {
   if (styleSwitchTimeoutId) {
     clearTimeout(styleSwitchTimeoutId);
     styleSwitchTimeoutId = null;
+  }
+}
+
+function clearStyleReadyCheck() {
+  if (styleReadyCheckId) {
+    clearInterval(styleReadyCheckId);
+    styleReadyCheckId = null;
   }
 }
 
@@ -38,6 +47,7 @@ function finishStyleSwitch() {
 
   state.styleSwitching = false;
   clearStyleSwitchTimeout();
+  clearStyleReadyCheck();
   setLoading(false);
 }
 
@@ -48,13 +58,52 @@ function scheduleStyleSwitchFailsafe() {
   }, 15000);
 }
 
+function scheduleStyleReadyCheck() {
+  clearStyleReadyCheck();
+  styleReadyCheckId = setInterval(() => {
+    if (!state.map || state.styleReady) {
+      return;
+    }
+    if (!state.map.isStyleLoaded()) {
+      return;
+    }
+    onStyleReady();
+  }, 120);
+}
+
+function startQueuedBasemapSwitch() {
+  if (!pendingBasemapKey || !state.map) {
+    return;
+  }
+
+  const styleKey = pendingBasemapKey;
+  pendingBasemapKey = null;
+  state.styleReady = false;
+
+  if (!state.styleSwitching) {
+    state.styleSwitching = true;
+    setLoading(true, "Cambiando estilo base...");
+  }
+
+  scheduleStyleSwitchFailsafe();
+  state.map.setStyle(styleUrls[styleKey]);
+  scheduleStyleReadyCheck();
+}
+
 function onStyleReady() {
+  clearStyleReadyCheck();
   state.styleReady = true;
   classifyMapLayers();
   captureBaseLabelSizes();
   ensureCafeLayers();
   updateCafeSource(false);
   applyAllStyleControls();
+
+  if (pendingBasemapKey) {
+    startQueuedBasemapSwitch();
+    return;
+  }
+
   finishStyleSwitch();
 }
 
@@ -62,18 +111,16 @@ function switchBasemap(styleKey) {
   if (!styleUrls[styleKey]) {
     return;
   }
-  if (styleKey === state.currentBasemap) {
+  if (styleKey === state.currentBasemap && !pendingBasemapKey && !state.styleSwitching) {
     return;
   }
 
   state.currentBasemap = styleKey;
-  state.styleReady = false;
+  pendingBasemapKey = styleKey;
+
   if (!state.styleSwitching) {
-    state.styleSwitching = true;
-    setLoading(true, "Cambiando estilo base...");
+    startQueuedBasemapSwitch();
   }
-  scheduleStyleSwitchFailsafe();
-  state.map.setStyle(styleUrls[styleKey]);
 }
 
 function init() {
@@ -99,6 +146,8 @@ function init() {
       await loadDefaultMapData();
     }
   });
+
+  scheduleStyleReadyCheck();
 }
 
 init();

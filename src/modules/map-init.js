@@ -22,7 +22,11 @@ export function initMap({ onStyleReady, onInitialLoad, onMoveEnd }) {
 
   state.map.addControl(new maplibre.NavigationControl({ showCompass: false }), "bottom-right");
 
-  state.map.on("style.load", onStyleReady);
+  state.map.on("styledata", () => {
+    if (!state.styleReady && state.map.isStyleLoaded()) {
+      onStyleReady();
+    }
+  });
 
   state.map.on("load", async () => {
     state.mapReady = true;
