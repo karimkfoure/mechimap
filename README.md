@@ -14,7 +14,7 @@ Web estatica para preparar un mapa limpio de cafeterias y generar estilos visual
 
 ## Uso local
 
-Abrir `index.html` directamente en navegador, o levantar un servidor estatico:
+Levantar un servidor estatico local:
 
 ```bash
 python3 -m http.server 8080
@@ -59,7 +59,7 @@ Notas de la suite:
 
 ## Fuente de datos
 
-- URL fija de My Maps (configurada en `app.js`): se toma el `mid`, se descarga KML y se parsean `Placemark -> Point`.
+- URL fija de My Maps (configurada en `src/core/constants.js`): se toma el `mid`, se descarga KML y se parsean `Placemark -> Point`.
 - Si hay carpetas/layers en el KML, se habilita selector de layer para visualizar subconjuntos.
 
 ## Flujo recomendado para flyer
@@ -95,4 +95,6 @@ GitHub Pages va a servir directamente `index.html`.
 
 - `index.html`: layout del estudio visual + controles jerarquicos colapsables.
 - `styles.css`: look & feel, overlays, poster y canvas.
-- `app.js`: MapLibre GL + carga fija desde My Maps + presets + estilado por capas.
+- `src/main.js`: bootstrap de la app y orquestacion de inicializacion.
+- `src/core/*`: constantes, referencias DOM, estado compartido y utilidades base.
+- `src/modules/*`: logica por dominio (mapa base, cafes, data source, eventos y UI de estudio).

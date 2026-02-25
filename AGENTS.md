@@ -33,7 +33,7 @@
   - Cambios acotados de bajo riesgo visual/UX (copy de UI, ajustes cosmeticos de CSS sin tocar logica): correr `npm run test:e2e:quick`.
   - Cambios funcionales o de riesgo medio/alto: correr `npm run test:e2e` (suite completa).
 - Se considera cambio funcional o de riesgo medio/alto cuando se toca alguno de estos bloques:
-  - `app.js`, `index.html`, flujo de import de datos, controles de estilo, preset, camara/encuadre, modo captura, capas o labels.
+  - `src/main.js`, `src/core/**`, `src/modules/**`, `index.html`, flujo de import de datos, controles de estilo, preset, camara/encuadre, modo captura, capas o labels.
   - Configuracion de tests (`playwright.config.js`, helpers/specs de Playwright, scripts de `package.json`).
   - Dependencias o comportamiento de carga/render del mapa.
 - En desarrollo iterativo usar primero `npm run test:e2e:quick` para feedback rapido; antes de push, si hubo cambios funcionales, escalar a `npm run test:e2e`.
