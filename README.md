@@ -64,6 +64,7 @@ Comportamiento de precedencia:
 
 - `Capas del mapa`: agua, parques, landuse, calles principales/secundarias, edificios, limites, labels.
 - `Motor`: selector agrupado por proveedor y etiquetas `[disruptivo]` para estilos tipo poster.
+- `Entidades del style activo`: editor dinamico por capas reales del basemap actual (`source-layer`) con visibilidad, color, opacidad y trazo cuando el style lo soporta.
 - `Colores por componente`: fondo, agua, verde, rutas, edificios, limites (con opacidades).
 - `Refinado global`: brillo, contraste, saturacion, grises y tono.
 - `Etiquetas base`: color, opacidad, halo, escala y transform.
@@ -136,6 +137,7 @@ Notas:
 - `full` recorre todo el catalogo de basemaps y presets, incluyendo `import -> preset -> basemap -> captura`.
 - La suite prioriza contratos de estabilidad de UI luego de acciones asincronas (preset/basemap/import).
 - El output de consola se mantiene corto cuando pasa; el analisis largo se hace solo cuando falla.
+- Los sliders (`input[type="range"]`) soportan doble click para volver al valor default.
 
 ## QA manual asistido (Playwright MCP)
 

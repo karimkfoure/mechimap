@@ -8,6 +8,7 @@ export const inputs = {
   applyPresetBtn: document.getElementById("applyPresetBtn"),
 
   basemapSelect: document.getElementById("basemapSelect"),
+  styleEntityEditor: document.getElementById("styleEntityEditor"),
 
   showWater: document.getElementById("showWater"),
   showParks: document.getElementById("showParks"),

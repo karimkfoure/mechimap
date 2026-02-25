@@ -10,6 +10,7 @@ import {
   applyComponentColors,
   applyLayerVisibility,
   applyMapCanvasFilter,
+  renderStyleEntityEditor,
   captureBaseLabelSizes,
   classifyMapLayers
 } from "./modules/map-style.js";
@@ -91,6 +92,7 @@ function onStyleReady(styleLoadToken = activeStyleLoadToken) {
   ensureCafeLayers();
   updateCafeSource(false);
   applyAllStyleControls();
+  renderStyleEntityEditor();
 
   if (pendingBasemapKey) {
     startQueuedBasemapSwitch();

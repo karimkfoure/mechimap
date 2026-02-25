@@ -25,10 +25,14 @@ test("@quick smoke flujo base", async ({ page, diagnostics }) => {
     element.value = "115";
     element.dispatchEvent(new Event("input", { bubbles: true }));
   });
+  await page.locator("#mapBrightness").evaluate((element) => {
+    element.dispatchEvent(new MouseEvent("dblclick", { bubbles: true }));
+  });
+  await expect(page.locator("#mapBrightness")).toHaveValue("100");
   const mapFilter = await page.evaluate(() =>
     getComputedStyle(document.documentElement).getPropertyValue("--map-filter")
   );
-  expect(mapFilter).toContain("brightness(115%)");
+  expect(mapFilter).toContain("brightness(100%)");
 
   await page.click("#togglePanelBtn");
   await expect(page.locator("#appShell")).toHaveClass(/panel-hidden/);
@@ -60,6 +64,49 @@ test("@quick switch representativo de basemaps mantiene capas visibles", async (
     await expect(page.locator("#basemapSelect")).toHaveValue(basemap);
     await assertBasemapSwitchStable(page);
     await assertCafeLayersVisible(page);
+
+    if (basemap === "stadiaToner") {
+      await expect(page.locator("#styleEntityEditor .style-entity-row").first()).toBeVisible();
+
+      await runUiAction(page, async () => {
+        await page.locator("#showRoadLabels").uncheck();
+      });
+      const hiddenRoadLabels = await page.evaluate(() => window.__MECHIMAP_MAP__.getLayoutProperty("road-label", "visibility"));
+      expect(hiddenRoadLabels).toBe("none");
+
+      await runUiAction(page, async () => {
+        await page.locator("#showRoadLabels").check();
+      });
+      const visibleRoadLabels = await page.evaluate(
+        () => window.__MECHIMAP_MAP__.getLayoutProperty("road-label", "visibility") || "visible"
+      );
+      expect(visibleRoadLabels).toBe("visible");
+
+      const beforeRoadStreetColor = await page.evaluate(() =>
+        window.__MECHIMAP_MAP__.getPaintProperty("road-street", "line-color")
+      );
+      await page.locator("#waterOpacity").evaluate((element) => {
+        element.value = "31";
+        element.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      const afterRoadStreetColor = await page.evaluate(() =>
+        window.__MECHIMAP_MAP__.getPaintProperty("road-street", "line-color")
+      );
+      expect(afterRoadStreetColor).toEqual(beforeRoadStreetColor);
+
+      const beforeRoadLabelOpacity = await page.evaluate(() =>
+        window.__MECHIMAP_MAP__.getPaintProperty("road-label", "text-opacity")
+      );
+      await page.locator("#baseLabelOpacity").evaluate((element) => {
+        element.value = "35";
+        element.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      const afterRoadLabelOpacity = await page.evaluate(() =>
+        window.__MECHIMAP_MAP__.getPaintProperty("road-label", "text-opacity")
+      );
+      expect(afterRoadLabelOpacity).toEqual(0.35);
+      expect(afterRoadLabelOpacity).not.toEqual(beforeRoadLabelOpacity);
+    }
   }
 
   assertNoRuntimeErrors(diagnostics);

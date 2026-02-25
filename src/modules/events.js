@@ -3,8 +3,8 @@ import { state } from "../core/state.js";
 import { applyCafeStyles, fitToData, updateCafeSource } from "./cafe-layers.js";
 import { loadDefaultMapData, applyLayerFilter } from "./data-source.js";
 import {
-  applyBaseLabelStyles,
-  applyComponentColors,
+  applySingleBaseLabelStyle,
+  applySingleComponentStyle,
   applyLayerVisibility,
   applyMapCanvasFilter
 } from "./map-style.js";
@@ -18,6 +18,19 @@ import {
 } from "./studio-ui.js";
 
 export function bindEvents({ switchBasemap, applyPreset }) {
+  document.addEventListener("dblclick", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement) || target.type !== "range") {
+      return;
+    }
+    if (target.value === target.defaultValue) {
+      return;
+    }
+    target.value = target.defaultValue;
+    target.dispatchEvent(new Event("input", { bubbles: true }));
+    target.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+
   inputs.reloadDataBtn.addEventListener("click", async () => {
     await loadDefaultMapData();
   });
@@ -49,29 +62,29 @@ export function bindEvents({ switchBasemap, applyPreset }) {
   });
 
   [
-    inputs.bgColor,
-    inputs.waterColor,
-    inputs.waterOpacity,
-    inputs.parkColor,
-    inputs.parkOpacity,
-    inputs.landuseColor,
-    inputs.landuseOpacity,
-    inputs.roadMajorColor,
-    inputs.roadMajorOpacity,
-    inputs.roadMinorColor,
-    inputs.roadMinorOpacity,
-    inputs.buildingColor,
-    inputs.buildingOpacity,
-    inputs.boundaryColor,
-    inputs.boundaryOpacity
-  ].forEach((el) => {
+    ["bgColor", inputs.bgColor],
+    ["waterColor", inputs.waterColor],
+    ["waterOpacity", inputs.waterOpacity],
+    ["parkColor", inputs.parkColor],
+    ["parkOpacity", inputs.parkOpacity],
+    ["landuseColor", inputs.landuseColor],
+    ["landuseOpacity", inputs.landuseOpacity],
+    ["roadMajorColor", inputs.roadMajorColor],
+    ["roadMajorOpacity", inputs.roadMajorOpacity],
+    ["roadMinorColor", inputs.roadMinorColor],
+    ["roadMinorOpacity", inputs.roadMinorOpacity],
+    ["buildingColor", inputs.buildingColor],
+    ["buildingOpacity", inputs.buildingOpacity],
+    ["boundaryColor", inputs.boundaryColor],
+    ["boundaryOpacity", inputs.boundaryOpacity]
+  ].forEach(([key, el]) => {
     el.addEventListener("input", () => {
       state.componentStyleOverridesEnabled = true;
-      applyComponentColors();
+      applySingleComponentStyle(key);
     });
     el.addEventListener("change", () => {
       state.componentStyleOverridesEnabled = true;
-      applyComponentColors();
+      applySingleComponentStyle(key);
     });
   });
 
@@ -83,20 +96,20 @@ export function bindEvents({ switchBasemap, applyPreset }) {
   inputs.resetGlobalFiltersBtn.addEventListener("click", resetGlobalFilters);
 
   [
-    inputs.baseLabelColor,
-    inputs.baseLabelOpacity,
-    inputs.baseLabelHaloColor,
-    inputs.baseLabelHaloWidth,
-    inputs.baseLabelSizeScale,
-    inputs.baseLabelTransform
-  ].forEach((el) => {
+    ["baseLabelColor", inputs.baseLabelColor],
+    ["baseLabelOpacity", inputs.baseLabelOpacity],
+    ["baseLabelHaloColor", inputs.baseLabelHaloColor],
+    ["baseLabelHaloWidth", inputs.baseLabelHaloWidth],
+    ["baseLabelSizeScale", inputs.baseLabelSizeScale],
+    ["baseLabelTransform", inputs.baseLabelTransform]
+  ].forEach(([key, el]) => {
     el.addEventListener("input", () => {
       state.baseLabelStyleOverridesEnabled = true;
-      applyBaseLabelStyles();
+      applySingleBaseLabelStyle(key);
     });
     el.addEventListener("change", () => {
       state.baseLabelStyleOverridesEnabled = true;
-      applyBaseLabelStyles();
+      applySingleBaseLabelStyle(key);
     });
   });
 

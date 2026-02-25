@@ -192,6 +192,56 @@ details[open] > summary::after {
   width: auto;
 }
 
+.style-entity-empty {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #5e6370;
+}
+
+.style-entity-row {
+  border: 1px solid #d8d2c6;
+  border-radius: 0.56rem;
+  padding: 0.45rem 0.5rem 0.5rem;
+  background: rgba(255, 255, 255, 0.62);
+  margin-bottom: 0.45rem;
+}
+
+.style-entity-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.35rem;
+}
+
+.style-entity-name {
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.style-entity-count {
+  font-size: 0.72rem;
+  color: #5e6370;
+}
+
+.style-entity-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 0.45rem;
+}
+
+.style-entity-controls label {
+  margin: 0;
+  font-size: 0.72rem;
+}
+
+.style-entity-controls input[type="range"],
+.style-entity-controls input[type="color"] {
+  margin-top: 0.2rem;
+}
+
 .status {
   margin: 0.2rem 0 0.2rem;
   font-size: 0.82rem;
