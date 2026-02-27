@@ -10,6 +10,16 @@ import {
 import { hashSeed } from "../core/helpers.js";
 import { safeSetLayout, safeSetPaint } from "./map-style.js";
 
+function cafeLabelHaloBlur(value) {
+  const haloWidth = Number(value);
+
+  if (!Number.isFinite(haloWidth) || haloWidth <= 0) {
+    return 0;
+  }
+
+  return Number(Math.min(haloWidth * 0.45, 1.4).toFixed(2));
+}
+
 function jitterPoint(point, meters) {
   if (!meters) {
     return { lat: point.lat, lng: point.lng };
@@ -156,6 +166,7 @@ export function ensureCafeLayers() {
         "text-color": "#1f232e",
         "text-halo-color": "#ffffff",
         "text-halo-width": 1.2,
+        "text-halo-blur": cafeLabelHaloBlur(1.2),
         "text-opacity": 1
       }
     });
@@ -196,9 +207,11 @@ export function applyCafeStyles() {
   const offsetEm = Number(inputs.labelOffsetY.value) / Number(inputs.labelSize.value);
   safeSetLayout(cafeLabelLayerId, "text-offset", [0, offsetEm]);
 
+  const haloWidth = Number(inputs.labelHaloWidth.value);
   safeSetPaint(cafeLabelLayerId, "text-color", inputs.labelColor.value);
   safeSetPaint(cafeLabelLayerId, "text-halo-color", inputs.labelHaloColor.value);
-  safeSetPaint(cafeLabelLayerId, "text-halo-width", Number(inputs.labelHaloWidth.value));
+  safeSetPaint(cafeLabelLayerId, "text-halo-width", haloWidth);
+  safeSetPaint(cafeLabelLayerId, "text-halo-blur", cafeLabelHaloBlur(haloWidth));
 }
 
 export function updateCafeSource(shouldFit = false) {
