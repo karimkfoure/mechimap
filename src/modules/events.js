@@ -2,6 +2,7 @@ import { inputs } from "../core/inputs.js";
 import { state } from "../core/state.js";
 import { applyCafeStyles, fitToData, updateCafeSource } from "./cafe-layers.js";
 import { loadDefaultMapData, applyLayerFilter } from "./data-source.js";
+import { exportViewportPng } from "./export-image.js";
 import {
   applySingleBaseLabelStyle,
   applySingleComponentStyle,
@@ -230,6 +231,9 @@ export function bindEvents({ switchBasemap, applyPreset }) {
   inputs.applyViewBtn.addEventListener("click", applyManualView);
   inputs.fitBtn.addEventListener("click", fitToData);
   inputs.resetCameraBtn.addEventListener("click", resetCamera);
+  inputs.downloadViewportBtn.addEventListener("click", () => {
+    exportViewportPng();
+  });
 
   inputs.togglePanelBtn.addEventListener("click", () => {
     inputs.appShell.classList.toggle("panel-hidden");

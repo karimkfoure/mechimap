@@ -138,6 +138,12 @@ button:hover {
   filter: brightness(1.08);
 }
 
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+  filter: none;
+}
+
 details {
   border: 1px solid #d7d1c4;
   border-radius: 0.58rem;
@@ -405,6 +411,28 @@ details[open] > summary::after {
   display: none;
 }
 
+.map-actions {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 8;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.map-action-button {
+  width: auto;
+  min-width: 180px;
+  margin: 0;
+  padding: 0.72rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 14px 28px rgba(10, 14, 22, 0.28);
+  backdrop-filter: blur(10px);
+  background: linear-gradient(160deg, rgba(20, 26, 39, 0.92) 0%, rgba(50, 57, 73, 0.9) 100%);
+  pointer-events: auto;
+}
+
 .loading-card {
   min-width: 220px;
   padding: 0.8rem 0.9rem;
@@ -459,5 +487,16 @@ details[open] > summary::after {
 
   .map-wrap {
     padding: 0;
+  }
+
+  .map-actions {
+    top: 14px;
+    right: 14px;
+  }
+
+  .map-action-button {
+    min-width: 0;
+    padding: 0.68rem 0.9rem;
+    font-size: 0.88rem;
   }
 }

@@ -9,7 +9,7 @@ La app resuelve este flujo de punta a punta:
 1. Cargar puntos de cafeterias desde una fuente KML.
 2. Ajustar estilo visual del mapa y de los markers desde UI.
 3. Cambiar preset/motor base sin romper el estado visual.
-4. Entrar en modo captura y exportar screenshot manual para flyer.
+4. Entrar en modo captura y exportar PNG desde la UI o tomar screenshot manual para flyer.
 
 ## Funcionalidades principales
 
@@ -19,6 +19,7 @@ La app resuelve este flujo de punta a punta:
 - Presets visuales y ajustes finos por bloques (capas, colores, labels, atmosfera, poster, canvas).
 - Selector de basemap agrupado por proveedor (OpenFreeMap, CARTO, Stadia), con variantes `NoLabels` y estilos disruptivos.
 - Modo captura para ocultar panel y priorizar encuadre.
+- Exportacion PNG 2x del viewport actual del mapa, incluyendo atmosfera, marco y poster.
 
 ## Fuente de datos
 
@@ -72,7 +73,7 @@ Comportamiento de precedencia:
 - `Etiquetas base`: color, opacidad, halo, escala y transform.
 - `Cafeterias`: marker, halo, sombra, dispersion y texto.
 - `Atmosfera y poster`: tint, vignette, grano, marco, titulo y subtitulo.
-- `Vista y encuadre`: ratio, padding, pitch, bearing, centro/zoom y modo captura.
+- `Vista y encuadre`: ratio, padding, pitch, bearing, centro/zoom, modo captura y descarga PNG 2x.
 
 ## Requisitos
 
@@ -104,7 +105,7 @@ La carga inicial abre con `Default Toner Lite`: `Stamen Toner Lite`, zoom `11.99
 4. Ajustar controles visuales segun el objetivo del flyer.
 5. Ajustar ratio y encuadre.
 6. Activar `Modo captura`.
-7. Tomar screenshot manual.
+7. Descargar PNG desde `Descargar PNG` o tomar screenshot manual.
 
 ## Testing (Playwright)
 

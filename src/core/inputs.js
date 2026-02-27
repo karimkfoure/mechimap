@@ -127,10 +127,12 @@ export const inputs = {
   fitBtn: document.getElementById("fitBtn"),
   resetCameraBtn: document.getElementById("resetCameraBtn"),
   togglePanelBtn: document.getElementById("togglePanelBtn"),
+  downloadViewportBtn: document.getElementById("downloadViewportBtn"),
 
   appShell: document.getElementById("appShell"),
   mapWrap: document.getElementById("mapWrap"),
   mapFrame: document.getElementById("mapFrame"),
+  map: document.getElementById("map"),
 
   posterOverlay: document.getElementById("posterOverlay"),
   posterTitleNode: document.getElementById("posterTitleNode"),

@@ -1,3 +1,5 @@
+const fs = require("node:fs/promises");
+
 const {
   assertBasemapSwitchStable,
   assertCafeLayersVisible,
@@ -15,7 +17,7 @@ test.beforeEach(async ({ page }) => {
   await mockDefaultKml(page);
 });
 
-test("@quick smoke flujo base", async ({ page, diagnostics }) => {
+test("@quick smoke flujo base", async ({ page, diagnostics }, testInfo) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("h1")).toHaveText("Bike & Coffee");
   await expect(page.locator("#status")).toContainText(/Cargando|Cargados/);
@@ -29,6 +31,22 @@ test("@quick smoke flujo base", async ({ page, diagnostics }) => {
   await expect(page.locator("#styleEntityEditor .style-entity-row", { hasText: "Water Name" }).locator('input[type="checkbox"]').first()).not.toBeChecked();
   await expect(page.locator("#styleEntityEditor .style-entity-row", { hasText: "Poi" }).locator('input[type="checkbox"]').first()).not.toBeChecked();
   await expect(page.locator("#styleEntityEditor .style-entity-row", { hasText: "Transportation Name" }).locator('input[type="checkbox"]').first()).not.toBeChecked();
+
+  const mapFrameBox = await page.locator("#mapFrame").boundingBox();
+  expect(mapFrameBox).not.toBeNull();
+
+  const downloadPromise = page.waitForEvent("download");
+  await page.click("#downloadViewportBtn");
+  const download = await downloadPromise;
+  const downloadPath = testInfo.outputPath("viewport-export.png");
+  await download.saveAs(downloadPath);
+  const downloadBuffer = await fs.readFile(downloadPath);
+  expect(download.suggestedFilename()).toMatch(/^coffeemap-\d{8}-\d{6}\.png$/);
+  expect(downloadBuffer.length).toBeGreaterThan(1024);
+  expect(downloadBuffer.toString("ascii", 1, 4)).toBe("PNG");
+  expect(downloadBuffer.readUInt32BE(16)).toBe(Math.round(mapFrameBox.width * 2));
+  expect(downloadBuffer.readUInt32BE(20)).toBe(Math.round(mapFrameBox.height * 2));
+  await expect(page.locator("#status")).toContainText("PNG exportado");
 
   await page.locator("#mapBrightness").evaluate((element) => {
     element.value = "115";
