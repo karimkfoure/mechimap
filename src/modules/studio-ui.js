@@ -9,7 +9,8 @@ import {
   applyCreativeFeatureAmplification,
   applyComponentColors,
   applyLayerVisibility,
-  applyMapCanvasFilter
+  applyMapCanvasFilter,
+  renderStyleEntityEditor
 } from "./map-style.js";
 
 const globalFilterInputKeys = ["mapBrightness", "mapContrast", "mapSaturation", "mapGrayscale", "mapHue"];
@@ -70,9 +71,12 @@ const presetManagedInputKeys = [
   ...new Set(
     Object.values(presets)
       .flatMap((preset) => Object.keys(preset))
+      .filter((key) => key !== "styleEntityVisibility")
+      .filter((key) => !["centerLat", "centerLng", "zoomInput", "pitchInput", "bearingInput"].includes(key))
       .filter((key) => Boolean(inputs[key]))
   )
 ];
+const presetCameraInputKeys = ["centerLat", "centerLng", "zoomInput", "pitchInput", "bearingInput"];
 
 const creativeProfiles = {
   free: {},
@@ -461,10 +465,18 @@ export function applyPreset(presetName, switchBasemap) {
     }
   }
 
+  state.styleEntityVisibilityOverrides = { ...(preset.styleEntityVisibility || {}) };
+
+  const hasCameraOverride = presetCameraInputKeys.some((key) => Object.prototype.hasOwnProperty.call(preset, key));
+  if (hasCameraOverride && state.mapReady) {
+    applyManualView();
+  }
+
   if (preset.basemapSelect && preset.basemapSelect !== state.currentBasemap) {
     switchBasemap(preset.basemapSelect, { preserveStyleOverrides: true });
   } else {
     applyAllStyleControls();
+    renderStyleEntityEditor();
     updateCafeSource(false);
   }
 
@@ -482,6 +494,7 @@ export function resetStyleConflictsForBasemapSwitch() {
   resetInputsToDefaults(globalFilterInputKeys);
   resetInputsToDefaults(atmosphereInputKeys);
   resetInputsToDefaults(creativeInputKeys);
+  state.styleEntityVisibilityOverrides = {};
   state.componentStyleOverridesEnabled = false;
   state.baseLabelStyleOverridesEnabled = false;
 

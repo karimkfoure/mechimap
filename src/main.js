@@ -1,4 +1,4 @@
-import { defaultMyMapsUrl, styleUrls } from "./core/constants.js";
+import { defaultMyMapsUrl, defaultPresetName, styleUrls } from "./core/constants.js";
 import { inputs } from "./core/inputs.js";
 import { state } from "./core/state.js";
 import { setLoading } from "./core/ui-state.js";
@@ -30,6 +30,7 @@ let styleSwitchTimeoutId = null;
 let pendingBasemapKey = null;
 let activeStyleLoadToken = 0;
 let activeBasemapKey = state.currentBasemap;
+let initialPresetApplied = false;
 
 function clearStyleSwitchTimeout() {
   if (styleSwitchTimeoutId) {
@@ -127,6 +128,7 @@ function switchBasemap(styleKey, options = {}) {
 function init() {
   inputs.sourceLink.href = defaultMyMapsUrl;
   inputs.sourceLink.textContent = "Abrir fuente";
+  inputs.presetSelect.value = defaultPresetName;
 
   bindEvents({
     switchBasemap,
@@ -144,7 +146,11 @@ function init() {
     onStyleLoad: () => onStyleReady(activeStyleLoadToken),
     onInitialLoad: async () => {
       applyCanvasLayout();
-      await loadDefaultMapData();
+      if (!initialPresetApplied) {
+        initialPresetApplied = true;
+        applyPreset(inputs.presetSelect.value, switchBasemap);
+      }
+      await loadDefaultMapData({ shouldFit: false });
     }
   });
 }

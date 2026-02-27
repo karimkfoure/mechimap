@@ -25,6 +25,7 @@ export const state = {
   baseLabelTextFields: new Map(),
   baseFeaturePaint: new Map(),
   styleEntitiesByKey: new Map(),
+  styleEntityVisibilityOverrides: {},
   mapReady: false,
   styleReady: false,
   componentStyleOverridesEnabled: false,

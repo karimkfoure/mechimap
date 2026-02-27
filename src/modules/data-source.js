@@ -162,7 +162,8 @@ function syncLayerFilterOptions() {
   inputs.layerFilter.value = layerNames.includes(previous) ? previous : "";
 }
 
-export function applyLayerFilter() {
+export function applyLayerFilter(options = {}) {
+  const shouldFit = options.shouldFit ?? true;
   const selected = inputs.layerFilter.value;
   if (!selected) {
     state.points = [...state.allPoints];
@@ -170,14 +171,14 @@ export function applyLayerFilter() {
     state.points = state.allPoints.filter((point) => point.layer === selected);
   }
 
-  updateCafeSource(true);
+  updateCafeSource(shouldFit);
   applyCafeStyles();
 
   const label = selected ? `Layer activo: ${selected}.` : "Mostrando todas las capas.";
   setStatus(`${label} Cafes visibles: ${state.points.length}.`);
 }
 
-function updatePoints(points, sourceLabel) {
+function updatePoints(points, sourceLabel, options = {}) {
   if (!points.length) {
     state.allPoints = [];
     state.points = [];
@@ -195,17 +196,17 @@ function updatePoints(points, sourceLabel) {
 
   state.allPoints = [...unique.values()];
   syncLayerFilterOptions();
-  applyLayerFilter();
+  applyLayerFilter(options);
 
   setStatus(`Cargados ${state.allPoints.length} cafes desde ${sourceLabel}.`);
 }
 
-export async function loadDefaultMapData() {
+export async function loadDefaultMapData(options = {}) {
   setLoading(true, "Descargando cafeterias desde My Maps...");
 
   try {
     const { loadedPoints, sourceUrl, mode } = await loadPointsFromMyMaps(defaultMyMapsUrl);
-    updatePoints(loadedPoints, `My Maps (${mode})`);
+    updatePoints(loadedPoints, `My Maps (${mode})`, options);
     setStatus(`Cargados ${state.allPoints.length} cafes. Fuente: ${sourceUrl}`);
   } catch (error) {
     state.allPoints = [];

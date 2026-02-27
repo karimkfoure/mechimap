@@ -103,7 +103,7 @@ test("flujo completo: carga, estilo, poster y encuadre", async ({ page, diagnost
     });
     expect(Number(await page.inputValue("#centerLat"))).toBeCloseTo(-31.42048, 3);
     expect(Number(await page.inputValue("#centerLng"))).toBeCloseTo(-64.18262, 3);
-    expect(Number(await page.inputValue("#zoomInput"))).toBeCloseTo(13, 1);
+    expect(Number(await page.inputValue("#zoomInput"))).toBeCloseTo(11.99, 2);
 
     await runUiAction(page, async () => {
       await page.selectOption("#canvasRatio", "1:1");
@@ -179,7 +179,7 @@ test("@full recorre catalogo completo de basemaps y presets", async ({ page, dia
 
   await test.step("presets: recorrido completo y combinacion import -> preset -> basemap -> captura", async () => {
     const presetValues = await getSelectOptionValues(page, "#presetSelect");
-    expect(presetValues.length).toBeGreaterThanOrEqual(12);
+    expect(presetValues.length).toBeGreaterThanOrEqual(13);
 
     for (const preset of presetValues) {
       await applyPreset(page, preset, { timeout: 30_000 });

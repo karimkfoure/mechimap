@@ -918,6 +918,26 @@ function getEntityWidth(entity) {
   return 1;
 }
 
+function applyStyleEntityVisibilityOverrides(entities) {
+  const overrides = state.styleEntityVisibilityOverrides || {};
+  const entries = Object.entries(overrides);
+
+  if (!entries.length) {
+    return;
+  }
+
+  for (const [entityKey, isVisible] of entries) {
+    const entity = entities.find((candidate) => candidate.key === entityKey);
+    if (!entity) {
+      continue;
+    }
+
+    for (const layer of entity.layers) {
+      safeSetLayout(layer.id, "visibility", isVisible ? "visible" : "none");
+    }
+  }
+}
+
 function ensureStyleEntityEditorListeners() {
   if (!inputs.styleEntityEditor || inputs.styleEntityEditor.dataset.bound === "1") {
     return;
@@ -1001,6 +1021,7 @@ export function renderStyleEntityEditor() {
 
   const entities = collectStyleEntities();
   state.styleEntitiesByKey = new Map(entities.map((entity) => [entity.key, entity]));
+  applyStyleEntityVisibilityOverrides(entities);
   inputs.styleEntityEditor.innerHTML = "";
 
   if (!entities.length) {

@@ -35,12 +35,29 @@ export const ratioMap = {
 
 export const defaultCamera = {
   center: [-64.18262, -31.42048],
-  zoom: 13,
+  zoom: 11.99,
   pitch: 0,
   bearing: 0
 };
 
+export const defaultPresetName = "default-toner-lite";
+
 export const presets = {
+  "default-toner-lite": {
+    basemapSelect: "stadiaTonerLite",
+    showPlaceLabels: false,
+    showPoiLabels: false,
+    showWaterLabels: false,
+    labelHaloWidth: 4,
+    labelOffsetY: 21,
+    zoomInput: 11.99,
+    styleEntityVisibility: {
+      place: false,
+      water_name: false,
+      poi: false,
+      transportation_name: false
+    }
+  },
   editorial: {
     basemapSelect: "cartoPositron",
     bgColor: "#f2ece2",

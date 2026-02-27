@@ -180,9 +180,13 @@ function assertNoRuntimeErrors(diagnostics) {
       return false;
     }
 
+    const isFromMaplibre = String(entry.location?.url || "").includes("maplibre-gl");
     const isBenignMaplibreAbort =
-      entry.text.includes("AbortError: signal is aborted without reason") &&
-      String(entry.location?.url || "").includes("maplibre-gl");
+      isFromMaplibre &&
+      (
+        entry.text.includes("AbortError: signal is aborted without reason") ||
+        entry.text.includes("AbortError: The user aborted a request.")
+      );
 
     return !isBenignMaplibreAbort;
   });
