@@ -10,18 +10,6 @@ import {
 import { hashSeed } from "../core/helpers.js";
 import { safeSetLayout, safeSetPaint } from "./map-style.js";
 
-function cafeLabelHaloWidth(value, labelSize) {
-  const haloWidth = Number(value);
-  const textSize = Number(labelSize);
-
-  if (!Number.isFinite(haloWidth) || haloWidth <= 0 || !Number.isFinite(textSize) || textSize <= 0) {
-    return 0;
-  }
-
-  const safeMaxWidth = Math.max(1.6, textSize * 0.18);
-  return Number(Math.min(haloWidth, safeMaxWidth).toFixed(2));
-}
-
 function jitterPoint(point, meters) {
   if (!meters) {
     return { lat: point.lat, lng: point.lng };
@@ -167,7 +155,7 @@ export function ensureCafeLayers() {
       paint: {
         "text-color": "#1f232e",
         "text-halo-color": "#ffffff",
-        "text-halo-width": cafeLabelHaloWidth(1.2, 13),
+        "text-halo-width": 1.2,
         "text-opacity": 1
       }
     });
@@ -202,7 +190,6 @@ export function applyCafeStyles() {
 
   const labelVisible = inputs.showLabels.checked ? "visible" : "none";
   const labelSize = Number(inputs.labelSize.value);
-  const haloWidth = cafeLabelHaloWidth(inputs.labelHaloWidth.value, labelSize);
   safeSetLayout(cafeLabelLayerId, "visibility", labelVisible);
   safeSetLayout(cafeLabelLayerId, "text-size", labelSize);
   safeSetLayout(cafeLabelLayerId, "text-letter-spacing", Number(inputs.labelLetterSpacing.value));
@@ -212,7 +199,7 @@ export function applyCafeStyles() {
 
   safeSetPaint(cafeLabelLayerId, "text-color", inputs.labelColor.value);
   safeSetPaint(cafeLabelLayerId, "text-halo-color", inputs.labelHaloColor.value);
-  safeSetPaint(cafeLabelLayerId, "text-halo-width", haloWidth);
+  safeSetPaint(cafeLabelLayerId, "text-halo-width", Number(inputs.labelHaloWidth.value));
 }
 
 export function updateCafeSource(shouldFit = false) {
