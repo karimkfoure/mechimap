@@ -194,8 +194,9 @@ export function applyCafeStyles() {
   safeSetLayout(cafeLabelLayerId, "text-size", labelSize);
   safeSetLayout(cafeLabelLayerId, "text-letter-spacing", Number(cafeStyles.labelLetterSpacing));
 
-  const offsetEm = Number(cafeStyles.labelOffsetY) / labelSize;
-  safeSetLayout(cafeLabelLayerId, "text-offset", [0, offsetEm]);
+  const offsetXEm = Number(cafeStyles.labelOffsetX) / labelSize;
+  const offsetYEm = Number(cafeStyles.labelOffsetY) / labelSize;
+  safeSetLayout(cafeLabelLayerId, "text-offset", [offsetXEm, offsetYEm]);
 
   safeSetPaint(cafeLabelLayerId, "text-color", cafeStyles.labelColor);
   safeSetPaint(cafeLabelLayerId, "text-halo-color", cafeStyles.labelHaloColor);

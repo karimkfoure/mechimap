@@ -70,6 +70,7 @@ const inputBindings = {
   labelHaloColor: createBinding("cafeStyles.labelHaloColor"),
   labelHaloWidth: createBinding("cafeStyles.labelHaloWidth"),
   labelLetterSpacing: createBinding("cafeStyles.labelLetterSpacing"),
+  labelOffsetX: createBinding("cafeStyles.labelOffsetX"),
   labelOffsetY: createBinding("cafeStyles.labelOffsetY"),
   creativeProfileSelect: createBinding("creative.creativeProfileSelect"),
   labelDensityPreset: createBinding("creative.labelDensityPreset"),

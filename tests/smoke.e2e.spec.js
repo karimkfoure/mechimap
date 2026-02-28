@@ -6,6 +6,7 @@ const {
   assertNoRuntimeErrors,
   gotoAndWaitForReady,
   mockDefaultKml,
+  normalizeColorValue,
   readGroupPaint,
   readRuntimeConfig,
   runUiAction,
@@ -29,6 +30,7 @@ test("@quick startup config limpio y export estable", async ({ page, diagnostics
   await expect(page.locator("#zoomInput")).toHaveValue("11.99");
   await expect(page.locator("#markerRadius")).toHaveValue("6");
   await expect(page.locator("#labelHaloWidth")).toHaveValue("3.6");
+  await expect(page.locator("#labelOffsetX")).toHaveValue("0");
   await expect(page.locator("#labelOffsetY")).toHaveValue("20");
   await expect(page.locator("#showPlaceLabels")).not.toBeChecked();
   await expect(page.locator("#showPoiLabels")).not.toBeChecked();
@@ -52,6 +54,7 @@ test("@quick startup config limpio y export estable", async ({ page, diagnostics
   expect(runtimeConfig.camera.zoom).toBeCloseTo(11.99, 2);
   expect(runtimeConfig.cafeStyles.markerRadius).toBe(6);
   expect(runtimeConfig.cafeStyles.labelHaloWidth).toBe(3.6);
+  expect(runtimeConfig.cafeStyles.labelOffsetX).toBe(0);
   expect(runtimeConfig.cafeStyles.labelOffsetY).toBe(20);
   expect(runtimeConfig.layerVisibility.showPlaceLabels).toBe(false);
   expect(runtimeConfig.styleEntityVisibility.place.visible).toBe(false);
@@ -63,10 +66,10 @@ test("@quick startup config limpio y export estable", async ({ page, diagnostics
     boundaries: await readGroupPaint(page, "boundaries", ["line-color"])
   };
 
-  expect(startupPaints.background?.value).toBe(runtimeConfig.componentStyles.bgColor);
-  expect(startupPaints.water?.value).toBe(runtimeConfig.componentStyles.waterColor);
-  expect(startupPaints.roadsMajor?.value).toBe(runtimeConfig.componentStyles.roadMajorColor);
-  expect(startupPaints.boundaries?.value).toBe(runtimeConfig.componentStyles.boundaryColor);
+  expect(normalizeColorValue(startupPaints.background?.value)).toBe(runtimeConfig.componentStyles.bgColor);
+  expect(normalizeColorValue(startupPaints.water?.value)).toBe(runtimeConfig.componentStyles.waterColor);
+  expect(normalizeColorValue(startupPaints.roadsMajor?.value)).toBe(runtimeConfig.componentStyles.roadMajorColor);
+  expect(normalizeColorValue(startupPaints.boundaries?.value)).toBe(runtimeConfig.componentStyles.boundaryColor);
 
   const mapFrameBox = await page.locator("#mapFrame").boundingBox();
   expect(mapFrameBox).not.toBeNull();

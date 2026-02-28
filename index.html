@@ -90,7 +90,7 @@
           </select>
         </section>
 
-        <section class="block">
+        <section class="block" hidden>
           <h2>Edicion Creativa</h2>
           <label for="creativeProfileSelect">Perfil</label>
           <select id="creativeProfileSelect">
@@ -105,7 +105,7 @@
             <button id="resetCreativeControlsBtn" type="button">Restablecer</button>
           </div>
 
-          <details open>
+          <details>
             <summary>Jerarquia visual</summary>
             <div class="details-content">
               <label for="labelDensityPreset">Densidad de labels</label>
@@ -128,7 +128,7 @@
             </div>
           </details>
 
-          <details open>
+          <details>
             <summary>Escala de features</summary>
             <div class="details-content">
               <label for="inkBoost">Escala de trazos global</label>
@@ -194,7 +194,7 @@
         </section>
 
         <section class="block">
-          <details open>
+          <details>
             <summary>Entidades del style activo</summary>
             <div class="details-content" id="styleEntityEditor">
               <p class="muted">Cargando entidades...</p>
@@ -203,7 +203,7 @@
         </section>
 
         <section class="block">
-          <details open>
+          <details>
             <summary>Capas del mapa</summary>
             <div class="details-content">
               <label class="checkbox-row"><input id="showWater" type="checkbox" checked /> Agua</label>
@@ -223,7 +223,7 @@
           <details>
             <summary>Colores por componente</summary>
             <div class="details-content">
-              <details open>
+              <details>
                 <summary>Terreno y agua</summary>
                 <div class="details-content nested">
                   <label for="bgColor">Fondo</label>
@@ -286,7 +286,7 @@
         </section>
 
         <section class="block">
-          <details open>
+          <details>
             <summary>Etiquetas del mapa base</summary>
             <div class="details-content">
               <label for="baseLabelColor">Color labels base</label>
@@ -308,7 +308,7 @@
             </div>
           </details>
 
-          <details>
+          <details open>
             <summary>Cafeterias: marcadores</summary>
             <div class="details-content">
               <label for="markerColor">Color marcador</label>
@@ -325,7 +325,7 @@
               <label for="haloColor">Color halo</label>
               <input id="haloColor" type="color" value="#d24828" />
               <label for="haloSize">Tamano halo</label>
-              <input id="haloSize" type="range" min="0" max="36" value="8" />
+              <input id="haloSize" type="range" min="0" max="36" value="7" />
               <label for="haloOpacity">Opacidad halo</label>
               <input id="haloOpacity" type="range" min="0" max="100" value="28" />
 
@@ -351,16 +351,16 @@
             </div>
           </details>
 
-          <details>
+          <details open>
             <summary>Cafeterias: etiquetas</summary>
             <div class="details-content">
               <label class="checkbox-row"><input id="showLabels" type="checkbox" checked /> Mostrar etiquetas</label>
-              <label for="labelMode">Modo de texto</label>
+              <!-- <label for="labelMode">Modo de texto</label>
               <select id="labelMode">
                 <option value="name">Nombre</option>
                 <option value="indexName">Indice + nombre</option>
                 <option value="index">Solo indice</option>
-              </select>
+              </select> -->
               <label for="labelTransform">Transform</label>
               <select id="labelTransform">
                 <option value="none">Normal</option>
@@ -377,8 +377,10 @@
               <input id="labelHaloWidth" type="range" min="0" max="4" step="0.1" value="1.2" />
               <label for="labelLetterSpacing">Tracking</label>
               <input id="labelLetterSpacing" type="range" min="0" max="0.3" step="0.01" value="0.04" />
+              <label for="labelOffsetX">Offset X</label>
+              <input id="labelOffsetX" type="range" min="-120" max="120" value="0" />
               <label for="labelOffsetY">Offset Y</label>
-              <input id="labelOffsetY" type="range" min="-60" max="30" value="-16" />
+              <input id="labelOffsetY" type="range" min="-120" max="120" value="20" />
             </div>
           </details>
         </section>
@@ -387,7 +389,7 @@
           <details>
             <summary>Atmosfera y poster</summary>
             <div class="details-content">
-              <details open>
+              <details>
                 <summary>Atmosfera</summary>
                 <div class="details-content nested">
                   <label for="tintColor">Tint</label>

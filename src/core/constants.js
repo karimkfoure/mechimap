@@ -109,6 +109,7 @@ export const configDefaults = {
     labelHaloColor: "#ffffff",
     labelHaloWidth: 3.6,
     labelLetterSpacing: 0.04,
+    labelOffsetX: 0,
     labelOffsetY: -16
   },
   creative: {

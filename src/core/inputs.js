@@ -93,6 +93,7 @@ export const inputs = {
   labelHaloColor: document.getElementById("labelHaloColor"),
   labelHaloWidth: document.getElementById("labelHaloWidth"),
   labelLetterSpacing: document.getElementById("labelLetterSpacing"),
+  labelOffsetX: document.getElementById("labelOffsetX"),
   labelOffsetY: document.getElementById("labelOffsetY"),
 
   tintColor: document.getElementById("tintColor"),

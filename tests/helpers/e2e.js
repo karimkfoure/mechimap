@@ -208,6 +208,102 @@ async function readGroupPaint(page, groupKey, propertyCandidates) {
   );
 }
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function toHex(value) {
+  return value.toString(16).padStart(2, "0");
+}
+
+function rgbToHex(r, g, b) {
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toLowerCase();
+}
+
+function hslToHex(h, s, l) {
+  const hue = ((h % 360) + 360) % 360;
+  const saturation = clamp(s / 100, 0, 1);
+  const lightness = clamp(l / 100, 0, 1);
+  const chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+  const segment = hue / 60;
+  const secondary = chroma * (1 - Math.abs((segment % 2) - 1));
+  const match = lightness - chroma / 2;
+
+  let red = 0;
+  let green = 0;
+  let blue = 0;
+
+  if (segment >= 0 && segment < 1) {
+    red = chroma;
+    green = secondary;
+  } else if (segment < 2) {
+    red = secondary;
+    green = chroma;
+  } else if (segment < 3) {
+    green = chroma;
+    blue = secondary;
+  } else if (segment < 4) {
+    green = secondary;
+    blue = chroma;
+  } else if (segment < 5) {
+    red = secondary;
+    blue = chroma;
+  } else {
+    red = chroma;
+    blue = secondary;
+  }
+
+  return rgbToHex(
+    Math.round((red + match) * 255),
+    Math.round((green + match) * 255),
+    Math.round((blue + match) * 255)
+  );
+}
+
+function normalizeColorValue(value) {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const candidate = value.trim().toLowerCase();
+  if (/^#[0-9a-f]{6}$/.test(candidate)) {
+    return candidate;
+  }
+
+  const shortHex = candidate.match(/^#([0-9a-f]{3})$/);
+  if (shortHex) {
+    const [, short] = shortHex;
+    return `#${short[0]}${short[0]}${short[1]}${short[1]}${short[2]}${short[2]}`;
+  }
+
+  const rgbMatch = candidate.match(/^rgba?\(([^)]+)\)$/);
+  if (rgbMatch) {
+    const parts = rgbMatch[1].split(",").map((part) => Number(part.trim()));
+    if (parts.length >= 3 && parts.slice(0, 3).every(Number.isFinite)) {
+      return rgbToHex(
+        clamp(Math.round(parts[0]), 0, 255),
+        clamp(Math.round(parts[1]), 0, 255),
+        clamp(Math.round(parts[2]), 0, 255)
+      );
+    }
+  }
+
+  const hslMatch = candidate.match(/^hsla?\(([^)]+)\)$/);
+  if (hslMatch) {
+    const parts = hslMatch[1].split(",").map((part) => part.trim());
+    if (parts.length >= 3) {
+      const hue = Number(parts[0]);
+      const saturation = Number(parts[1].replace("%", ""));
+      const lightness = Number(parts[2].replace("%", ""));
+      if ([hue, saturation, lightness].every(Number.isFinite)) {
+        return hslToHex(hue, saturation, lightness);
+      }
+    }
+  }
+
+  return candidate;
+}
+
 function assertNoRuntimeErrors(diagnostics) {
   const consoleErrors = diagnostics.console.filter((entry) => {
     if (entry.type !== "error") {
@@ -251,6 +347,7 @@ module.exports = {
   runUiAction,
   switchBasemap,
   waitForUiSettled,
+  normalizeColorValue,
   expect,
   test
 };

@@ -196,6 +196,7 @@ export function bindEvents({ switchBasemap, applyPreset }) {
       "labelHaloColor",
       "labelHaloWidth",
       "labelLetterSpacing",
+      "labelOffsetX",
       "labelOffsetY"
     ],
     () => {
